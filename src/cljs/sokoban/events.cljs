@@ -9,7 +9,7 @@
     db/default-db))
 
 (rf/reg-event-db
-  ::move-player
+  ::make-move
   (fn [{:keys [static-level
                player-position-history
                movable-blocks-history
