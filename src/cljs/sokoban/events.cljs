@@ -9,11 +9,6 @@
     db/default-db))
 
 (rf/reg-event-db
-  ::set-name
-  (fn [db [_ name]]
-    (assoc db :name name)))
-
-(rf/reg-event-db
   ::move-player
   (fn [{:keys [static-level player-pos movable-blocks] :as db} [_ dir]]
     (let [[pos blocks] (move-player player-pos dir static-level movable-blocks)]
