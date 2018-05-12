@@ -19,13 +19,13 @@
 (defn setup-keys []
   (rf/dispatch
    [::rp/set-keydown-rules
-    {:event-keys [[[::events/move-left]
+    {:event-keys [[[::events/move-player :left]
                    [{:which 72}] [{:which 37}]]
-                  [[::events/move-right]
+                  [[::events/move-player :right]
                    [{:which 76}] [{:which 39}]]
-                  [[::events/move-up]
+                  [[::events/move-player :up]
                    [{:which 75}] [{:which 38}]]
-                  [[::events/move-down]
+                  [[::events/move-player :down]
                    [{:which 74}] [{:which 40}]]]}]))
 
 (defn ^:export init! []

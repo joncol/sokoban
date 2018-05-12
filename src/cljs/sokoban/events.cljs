@@ -1,6 +1,7 @@
 (ns sokoban.events
   (:require [re-frame.core :as rf]
-            [sokoban.db :as db]))
+            [sokoban.db :as db]
+            [sokoban.board-util :refer [move-player]]))
 
 (rf/reg-event-db
   ::initialize-db
@@ -18,25 +19,9 @@
     (assoc db :name name)))
 
 (rf/reg-event-db
-  ::move-left
-  (rf/path [:player-pos])
-  (fn [pos _]
-    (update pos 1 dec)))
-
-(rf/reg-event-db
-  ::move-right
-  (rf/path [:player-pos])
-  (fn [pos _]
-    (update pos 1 inc)))
-
-(rf/reg-event-db
-  ::move-up
-  (rf/path [:player-pos])
-  (fn [pos _]
-    (update pos 0 dec)))
-
-(rf/reg-event-db
-  ::move-down
-  (rf/path [:player-pos])
-  (fn [pos _]
-    (update pos 0 inc)))
+  ::move-player
+  (fn [{:keys [static-level player-pos movable-blocks] :as db} [_ dir]]
+    (let [[pos blocks] (move-player player-pos dir static-level movable-blocks)]
+      (-> db
+          (assoc :player-pos pos)
+          (assoc :movable-blocks movable-blocks)))))
