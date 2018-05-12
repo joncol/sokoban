@@ -25,7 +25,11 @@
            :href        (str "https://cdnjs.cloudflare.com/ajax/libs/bulma/"
                              "0.7.1/css/bulma.min.css")
            :integrity   "sha256-zIG416V1ynj3Wgju/scU80KAEWOsO5rRLfVyRDuOv7Q="
-           :crossorigin "anonymous"}]])
+           :crossorigin "anonymous"}]
+   [:link {:rel         "stylesheet"
+           :href        (str "https://cdn.jsdelivr.net/npm/"
+                             "bulma-extensions@1.0.20/bulma-slider/dist/"
+                             "bulma-slider.min.css")}]])
 
 (defn loading-page []
   (html5
