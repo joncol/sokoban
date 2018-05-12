@@ -5,7 +5,8 @@
 
 (def default-db
   (let [level (str/split (slurp "resources/level01.txt") #"\n")]
-    {:static-level     (mapv #(vec (str/replace % #"[@$]" " ")) level)
-     :target-positions (block-positions level ".")
-     :player-pos       (first (block-positions level "@"))
-     :movable-blocks   (block-positions level "$")}))
+    {:static-level            (mapv #(vec (str/replace % #"[@$]" " ")) level)
+     :target-positions        (block-positions level ".")
+     :player-position-history [(first (block-positions level "@"))]
+     :movable-blocks-history  [(block-positions level "$")]
+     :current-move            0}))

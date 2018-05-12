@@ -7,19 +7,40 @@
     (:static-level db)))
 
 (rf/reg-sub
-  ::player-pos
+  ::player-position-history
   (fn [db]
-    (:player-pos db)))
+    (:player-position-history db)))
 
 (rf/reg-sub
-  ::movable-blocks
+  ::movable-blocks-history
   (fn [db]
-    (:movable-blocks db)))
+    (:movable-blocks-history db)))
 
 (rf/reg-sub
   ::target-positions
   (fn [db]
     (:target-positions db)))
+
+(rf/reg-sub
+  ::current-move
+  (fn [db]
+    (:current-move db)))
+
+(rf/reg-sub
+  ::player-pos
+  (fn [_]
+    [(rf/subscribe [::player-position-history])
+     (rf/subscribe [::current-move])])
+  (fn [[player-position-history current-move]]
+    (get player-position-history current-move)))
+
+(rf/reg-sub
+  ::movable-blocks
+  (fn [_]
+    [(rf/subscribe [::movable-blocks-history])
+     (rf/subscribe [::current-move])])
+  (fn [[movable-bloc-history current-move]]
+    (get movable-bloc-history current-move)))
 
 (rf/reg-sub
   ::level
@@ -42,3 +63,10 @@
     (->> target-positions
          (remove #(some (fn [p] (= p %)) movable-blocks))
          count)))
+
+(rf/reg-sub
+  ::history-size
+  (fn [_]
+    (rf/subscribe [::player-position-history]))
+  (fn [player-position-history]
+    (count player-position-history)))

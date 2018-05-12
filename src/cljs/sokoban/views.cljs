@@ -19,8 +19,25 @@
                              ^{:key x} [cell (get-in @level [y x])]))]))]))
 
 (defn game []
-  [:div [board]
-   [:label (str "Remaining: " @(rf/subscribe [::subs/remaining-count]))]])
+  [:div
+   [:div [:label (str "Remaining: " @(rf/subscribe [::subs/remaining-count]))]]
+   [board]
+   [:hr]
+   [:div
+    [:label (str "Current move: " @(rf/subscribe [::subs/current-move]) " ")]
+    [:span.icon.button
+     {:on-click #(rf/dispatch [::events/set-current-move 0])}
+     [:i.fas.fa-fast-backward {:aria-hidden true}]]
+    [:span.icon.button
+     {:on-click #(rf/dispatch [::events/update-current-move dec])}
+     [:i.fas.fa-step-backward {:aria-hidden true}]]
+    [:span.icon.button
+     {:on-click #(rf/dispatch [::events/update-current-move inc])}
+     [:i.fas.fa-step-forward {:aria-hidden true}]]
+    [:span.icon.button
+     {:on-click #(rf/dispatch [::events/set-current-move
+                               (dec @(rf/subscribe [::subs/history-size]))])}
+     [:i.fas.fa-fast-forward {:aria-hidden true}]]]])
 
 (defn main-panel []
   [game])
