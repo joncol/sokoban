@@ -16,3 +16,27 @@
   ::set-name
   (fn [db [_ name]]
     (assoc db :name name)))
+
+(rf/reg-event-db
+  ::move-left
+  (rf/path [:player-pos])
+  (fn [pos _]
+    (update pos 1 dec)))
+
+(rf/reg-event-db
+  ::move-right
+  (rf/path [:player-pos])
+  (fn [pos _]
+    (update pos 1 inc)))
+
+(rf/reg-event-db
+  ::move-up
+  (rf/path [:player-pos])
+  (fn [pos _]
+    (update pos 0 dec)))
+
+(rf/reg-event-db
+  ::move-down
+  (rf/path [:player-pos])
+  (fn [pos _]
+    (update pos 0 inc)))

@@ -14,6 +14,7 @@
                  [reagent "0.8.0"]
                  [reagent-utils "0.3.1"]
                  [re-frame "0.10.5"]
+                 [re-pressed "0.2.0"]
                  [ring "1.6.3"]
                  [ring-server "0.5.0"]
                  [ring/ring-defaults "0.3.1"]
