@@ -29,7 +29,6 @@
      (rf/subscribe [::movable-blocks])])
   (fn [[static-level player-pos movable-blocks]]
     (-> static-level
-        (assoc-in player-pos "@")
         (as-> l
             (reduce #(assoc-in %1 %2 "$") l movable-blocks))
         (assoc-in player-pos "@"))))
