@@ -19,7 +19,8 @@
                              ^{:key x} [cell (get-in @level [y x])]))]))]))
 
 (defn game []
-  [:div [board]])
+  [:div [board]
+   [:label (str "Remaining: " @(rf/subscribe [::subs/remaining-count]))]])
 
 (defn main-panel []
   [game])
