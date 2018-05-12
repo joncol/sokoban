@@ -3,18 +3,23 @@
             [sokoban.events :as events]
             [sokoban.subs :as subs]))
 
-(defn name-form [name]
-  [:div "Name: "
-   [:input {:type "text"
-            :value @name
-            :on-change #(rf/dispatch [::events/set-name
-                                      (-> % .-target .-value)])}]])
+(def cell-size 40)
+
+(defn cell [cell-type]
+  [:span.button {:style {:width cell-size
+                         :height cell-size}}
+   cell-type])
+
+(defn game []
+  (let [level (rf/subscribe [::subs/level])]
+    [:div
+     (doall (for [y (range (count @level))]
+              ^{:key y}
+              [:div (doall (for [x (range (count (get @level y)))]
+                             ^{:key x} [cell (get-in @level [y x])]))]))]))
 
 (defn home-panel []
-  (let [name (rf/subscribe [::subs/name])]
-    [:div (str "Hello from " @name ". This is the Home Page.")
-     [name-form name]
-     [:div [:a {:href "#/about"} "go to About Page"]]]))
+  [game])
 
 (defn about-panel []
   [:div "This is the About Page."
