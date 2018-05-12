@@ -11,7 +11,8 @@
 (defn block-positions [level block]
   (->> (for [y (find-value #(str/includes? % block) level)]
          (map #(-> [y %]) (find-value #(= % block) (get level y))))
-       (apply concat)))
+       (apply concat)
+       vec))
 
 (defn- move-fn [dir]
   (case dir
@@ -21,8 +22,17 @@
     :down  (fn [[y x]] [(inc y) x])
     identity))
 
+(defn free-pos? [level movable-blocks pos]
+  (and (not= "#" (get-in level pos))
+       (not (some #(= pos %) movable-blocks))))
+
 (defn move-player [pos dir level movable-blocks]
-  (let [new-pos ((move-fn dir) pos)]
-    (if (not= "#" (get-in level new-pos))
-      [new-pos movable-blocks]
-      [pos movable-blocks])))
+  (let [new-pos       ((move-fn dir) pos)
+        movable-index (first (find-value #(= new-pos %) movable-blocks))]
+    (if (= "#" (get-in level new-pos))
+      [pos movable-blocks]
+      (if (not movable-index)
+        [new-pos movable-blocks]
+        (if (free-pos? level movable-blocks ((move-fn dir) new-pos))
+          [new-pos (update movable-blocks movable-index (move-fn dir))]
+          [pos movable-blocks])))))

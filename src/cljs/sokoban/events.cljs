@@ -24,4 +24,4 @@
     (let [[pos blocks] (move-player player-pos dir static-level movable-blocks)]
       (-> db
           (assoc :player-pos pos)
-          (assoc :movable-blocks movable-blocks)))))
+          (assoc :movable-blocks blocks)))))
