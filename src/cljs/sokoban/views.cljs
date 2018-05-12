@@ -46,12 +46,45 @@
        :on-input #(rf/dispatch [::events/set-current-move
                                 (-> % .-target .-value int)])}]]))
 
+(defn level-complete-screen []
+  (let [completed (rf/subscribe [::subs/level-completed])
+        show      (rf/subscribe [::subs/show-congratulations-screen])]
+    [:div
+     [:div
+      {:hidden (not @completed)}
+      [:button.button
+       {:on-click #(rf/dispatch [::events/show-congratulations-screen true])}
+       "Congratulations"]]
+     [:div.modal.animated.fadeIn
+      {:class (when (and @completed (not (false? @show))) "is-active")}
+      [:div.modal-background
+       {:on-click #(rf/dispatch [::events/show-about false])}]
+      [:div#about-screen.modal-card.has-text-centered.is-rounded
+       {:style {:width "400px"}}
+       [:header.modal-card-head
+        [:p.modal-card-title.is-centered.animated.fadeInLeft "Congratulations!"]
+        [:button.delete.is-medium
+         {:aria-label "close"
+          :on-click #(rf/dispatch [::events/show-congratulations-screen false])}]
+        ]
+       [:div.modal-card-body
+        [:p
+         " Level completed "
+         [:i.fas.fa-heart.animated.pulse.anim-forever
+          {:aria-hidden true
+           :style {:color       "red"
+                   :margin-left "3px"}}]]]
+       [:footer.modal-card-foot
+        [:div.buttons
+         [:button.button "Next level"]
+         [:button.button "Replay"]]]]]]))
+
 (defn game []
   [:div
-   [:div [:label (str "Remaining: " @(rf/subscribe [::subs/remaining-count]))]]
    [board]
    [:hr]
-   [move-history]])
+   [move-history]
+   [level-complete-screen]])
 
 (defn main-panel []
   [game])

@@ -27,6 +27,11 @@
     (:current-move db)))
 
 (rf/reg-sub
+  ::show-congratulations-screen
+  (fn [db]
+    (:show-congratulations-screen db)))
+
+(rf/reg-sub
   ::player-pos
   (fn [_]
     [(rf/subscribe [::player-position-history])
@@ -63,6 +68,15 @@
     (->> target-positions
          (remove #(some (fn [p] (= p %)) movable-blocks))
          count)))
+
+(rf/reg-sub
+  ::level-completed
+  (fn [_]
+    [(rf/subscribe [::remaining-count])
+     (rf/subscribe [::congratulations-screen-hidden])])
+  (fn [[remaining-count congratulations-screen-hidden]]
+    (and (zero? remaining-count)
+         (not congratulations-screen-hidden))))
 
 (rf/reg-sub
   ::history-size

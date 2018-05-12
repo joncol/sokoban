@@ -29,7 +29,12 @@
    [:link {:rel         "stylesheet"
            :href        (str "https://cdn.jsdelivr.net/npm/"
                              "bulma-extensions@1.0.20/bulma-slider/dist/"
-                             "bulma-slider.min.css")}]])
+                             "bulma-slider.min.css")}]
+   [:link {:rel         "stylesheet"
+           :href        (str "https://cdnjs.cloudflare.com/ajax/libs/"
+                             "animate.css/3.5.2/animate.min.css")
+           :integrity   "sha256-j+P6EZJVrbXgwSR5Mx+eCS6FvP9Wq27MBRC/ogVriY0="
+           :crossorigin "anonymous"}]])
 
 (defn loading-page []
   (html5

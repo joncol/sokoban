@@ -41,3 +41,9 @@
              (if (< -1 i (count player-position-history))
                i
                current-move)))))
+
+(rf/reg-event-db
+  ::show-congratulations-screen
+  [(rf/path [:show-congratulations-screen])]
+  (fn [_ [_ show]]
+    show))
