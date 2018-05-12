@@ -22,4 +22,7 @@
     identity))
 
 (defn move-player [pos dir level movable-blocks]
-  [((move-fn dir) pos) movable-blocks])
+  (let [new-pos ((move-fn dir) pos)]
+    (if (not= "#" (get-in level new-pos))
+      [new-pos movable-blocks]
+      [pos movable-blocks])))
