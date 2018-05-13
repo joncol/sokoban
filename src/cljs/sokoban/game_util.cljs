@@ -1,4 +1,4 @@
-(ns sokoban.board-util
+(ns sokoban.game-util
   (:require [clojure.string :as str]))
 
 (defn- find-value
@@ -26,7 +26,7 @@
   (and (not= "#" (get-in level pos))
        (not (some #(= pos %) movable-blocks))))
 
-(defn move-player [pos dir level movable-blocks]
+(defn make-move [pos dir level movable-blocks]
   (let [new-pos       ((move-fn dir) pos)
         movable-index (first (find-value #(= new-pos %) movable-blocks))]
     (if (= "#" (get-in level new-pos))

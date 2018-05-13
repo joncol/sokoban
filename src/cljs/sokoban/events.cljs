@@ -1,7 +1,7 @@
 (ns sokoban.events
   (:require [re-frame.core :as rf]
             [sokoban.db :as db]
-            [sokoban.board-util :refer [move-player]]))
+            [sokoban.game-util :refer [make-move]]))
 
 (rf/reg-event-db
   ::initialize-db
@@ -17,7 +17,7 @@
        [_ dir]]
     (let [pos (get player-position-history current-move)
           blocks (get movable-blocks-history current-move)
-          [new-pos new-blocks] (move-player pos dir static-level blocks)]
+          [new-pos new-blocks] (make-move pos dir static-level blocks)]
       (if (= new-pos pos)
         db
         (-> db

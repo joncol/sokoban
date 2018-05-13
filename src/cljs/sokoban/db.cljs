@@ -1,7 +1,7 @@
 (ns sokoban.db
   (:require [clojure.string :as str]
             [sokoban.slurp :include-macros true :refer [slurp]]
-            [sokoban.board-util :refer [block-positions]]))
+            [sokoban.game-util :refer [block-positions]]))
 
 (def default-db
   (let [level (str/split (slurp "resources/level01.txt") #"\n")]
