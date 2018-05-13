@@ -2,18 +2,38 @@
 // .css files. Partials (files starting with "_") can be included using @import.
 // (import path can include "_", but it is not needed).
 
-$font-stack: 'Helvetica Neue', Verdana, Helvetica, Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css?family=Indie+Flower');
+
+$font-stack: "Indie Flower", sans-serif;
 $base-font-size: 1.125em;
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
 
 .body-container {
     font-family: $font-stack;
-    max-width: 600px;
     margin: 0 auto;
     padding-top: 72px;
     -webkit-font-smoothing: antialiased;
     font-size: $base-font-size;
     color: #333;
-    line-height: 1.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: radial-gradient(ellipse at center,
+                                rgba(240, 249, 255, 1) 0%,
+                                rgba(203, 235, 255, 1) 25%,
+                                rgba(161, 219, 255, 1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(
+        startColorstr = '#f0f9ff',
+        endColorstr = '#a1dbff',
+        GradientType = 1);
 }
 
 h1, h2, h3 {
@@ -47,4 +67,31 @@ a {
     -webkit-animation-iteration-count: infinite;
     -moz-animation-iteration-count: infinite;
     -o-animation-iteration-count: infinite;
+}
+
+.cell {
+    display: table-cell;
+    padding: 0;
+    margin: 0;
+}
+
+.cell span {
+    display: flex-inline;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.cell span .fas.fa-trophy {
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.wall {
+   background:url(
+       data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAG0lEQVQYV2NkYGD4z8DAwMgABXAGNgGwSgwVAFbmAgXQdISfAAAAAElFTkSuQmCC
+    ) repeat;
 }

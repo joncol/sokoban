@@ -6,27 +6,28 @@
 (def cell-size 40)
 
 (defn fa-icon [icon-class size color]
-  [:span {:style {:font-size size}}
+  [:span.icon {:style {:font-size size}}
    [:i.fas {:class       icon-class
             :style       {:color color}
             :aria-hidden true}]])
 
 (defn cell [cell-type]
-  [:span.button
-   {:style {:background-color (if (= "#" cell-type) "#84817A" "#e4f1fe")
-            :width cell-size
-            :height cell-size
-            :border-width "1px"
-            :margin-right -1
-            :margin-bottom -1
-            :border-color (if (= "#" cell-type) "#6b6861" "white")
-            :border-radius 0}}
+  [:div.cell.has-text-centered
+   {:class (case cell-type
+             "#" "wall"
+             "@" "player"
+             "." "target"
+             "*" "target-complete"
+             "$" "block"
+             nil)
+    :style {:width cell-size
+            :height cell-size}}
    (case cell-type
-     "." [fa-icon "fa-expand" "25px" "#67809F"]
+     "." [fa-icon "fa-expand" "25px" "#67809f"]
      "*" [fa-icon ["fa-trophy" "animated" "pulse"
-                   "anim-forever"] "25px"  "#F9BF3B"]
-     "$" [fa-icon "fa-trophy" "25px" "#F9BF3B"]
-     "@" [fa-icon "fa-bug" "28px" "#013243"]
+                   "anim-forever"] "25px"  "#f9bf3b"]
+     "$" [fa-icon "fa-trophy" "25px" "#f9bf3b"]
+     "@" [fa-icon "fa-bug" "25px" "#013243"]
      "#" nil
      cell-type)])
 
@@ -47,22 +48,21 @@
     [:div
      {:style {:width "280px"}}
      [:label (str "Current move: " @current-move " ")]
-     [:br]
-     [:span.icon.button
-      {:on-click #(rf/dispatch [::events/set-current-move 0])}
-      [:i.fas.fa-fast-backward {:aria-hidden true}]]
-     [:span.icon.button
-      {:on-click #(rf/dispatch [::events/update-current-move dec])}
-      [:i.fas.fa-step-backward {:aria-hidden true}]]
-     [:span.icon.button
-      {:on-click #(rf/dispatch [::events/update-current-move inc])}
-      [:i.fas.fa-step-forward {:aria-hidden true}]]
-     [:span.icon.button
-      {:on-click #(rf/dispatch [::events/set-current-move
-                                (dec @history-size)])}
-      [:i.fas.fa-fast-forward {:aria-hidden true}]]
-     [:br]
-     [:input.slider.is-fullwidth.is-medium.is-circle
+     [:div
+      [:span.icon.button.is-medium.is-rounded
+       {:on-click #(rf/dispatch [::events/set-current-move 0])}
+       [:i.fas.fa-fast-backward {:aria-hidden true}]]
+      [:span.icon.button.is-medium.is-rounded
+       {:on-click #(rf/dispatch [::events/update-current-move dec])}
+       [:i.fas.fa-step-backward {:aria-hidden true}]]
+      [:span.icon.button.is-medium.is-rounded
+       {:on-click #(rf/dispatch [::events/update-current-move inc])}
+       [:i.fas.fa-step-forward {:aria-hidden true}]]
+      [:span.icon.button.is-medium.is-rounded
+       {:on-click #(rf/dispatch [::events/set-current-move
+                                 (dec @history-size)])}
+       [:i.fas.fa-fast-forward {:aria-hidden true}]]]
+     [:input.slider.is-fullwidth.is-medium.is-circle.is-white
       {:type     "range"
        :min      0
        :max      (dec @history-size)
@@ -106,7 +106,6 @@
 (defn game []
   [:div
    [board]
-   [:hr]
    [move-history]
    [level-complete-screen]])
 
