@@ -13,20 +13,20 @@
 
 (defn cell [cell-type]
   [:span.button
-   {:class (if (= "#" cell-type) "is-dark")
-    :style {:width cell-size
+   {:style {:background-color (if (= "#" cell-type) "#84817A" "#e4f1fe")
+            :width cell-size
             :height cell-size
-            :border-style "dotted"
             :border-width "1px"
             :margin-right -1
             :margin-bottom -1
-            :border-color "#a0a0a0"}}
+            :border-color (if (= "#" cell-type) "#6b6861" "white")
+            :border-radius 0}}
    (case cell-type
-     "." [fa-icon "fa-expand" "25px" "#a0a0a0"]
-     "!" [fa-icon ["fa-trophy" "animated" "pulse"
-                   "anim-forever"] "25px" "#013243"]
-     "$" [fa-icon "fa-trophy" "25px" "#013243"]
-     "@" [fa-icon "fa-bug" "28px" "#F9BF3B"]
+     "." [fa-icon "fa-expand" "25px" "#67809F"]
+     "*" [fa-icon ["fa-trophy" "animated" "pulse"
+                   "anim-forever"] "25px"  "#F9BF3B"]
+     "$" [fa-icon "fa-trophy" "25px" "#F9BF3B"]
+     "@" [fa-icon "fa-bug" "28px" "#013243"]
      "#" nil
      cell-type)])
 
@@ -47,6 +47,7 @@
     [:div
      {:style {:width "280px"}}
      [:label (str "Current move: " @current-move " ")]
+     [:br]
      [:span.icon.button
       {:on-click #(rf/dispatch [::events/set-current-move 0])}
       [:i.fas.fa-fast-backward {:aria-hidden true}]]
@@ -61,7 +62,7 @@
                                 (dec @history-size)])}
       [:i.fas.fa-fast-forward {:aria-hidden true}]]
      [:br]
-     [:input.slider.is-fullwidth.is-medium
+     [:input.slider.is-fullwidth.is-medium.is-circle
       {:type     "range"
        :min      0
        :max      (dec @history-size)

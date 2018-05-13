@@ -60,7 +60,7 @@
             (reduce (fn [l block-pos]
                       (assoc-in l block-pos
                                 (if (some #(= block-pos %) target-positions)
-                                  "!"
+                                  "*"
                                   "$")))
                     l movable-blocks))
         (assoc-in player-pos "@"))))
