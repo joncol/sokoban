@@ -1,4 +1,8 @@
 @import url("https://fonts.googleapis.com/css?family=Indie+Flower");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css");
+@import url("https://cdn.jsdelivr.net/npm/bulma-extensions@1.0.28/bulma-slider/dist/bulma-slider.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
+@import url("https://use.fontawesome.com/releases/v5.0.10/css/all.css");
 html {
   height: 100%; }
 
@@ -42,25 +46,16 @@ a {
   -moz-animation-iteration-count: infinite;
   -o-animation-iteration-count: infinite; }
 
-.cell {
-  display: table-cell;
-  padding: 0;
-  margin: 0; }
-
-.cell span {
-  display: flex-inline;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0; }
+.cell.button {
+  border: none;
+  border-radius: 0;
+  background-color: transparent; }
 
 .cell span .fas.fa-trophy {
   -webkit-text-stroke-width: 1px;
   -webkit-text-stroke-color: black; }
 
-.wall {
+.cell.wall {
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAG0lEQVQYV2NkYGD4z8DAwMgABXAGNgGwSgwVAFbmAgXQdISfAAAAAElFTkSuQmCC) repeat; }
 
 /*# sourceMappingURL=site.css.map */

@@ -13,28 +13,7 @@
    [:meta {:charset "utf-8"}]
    [:meta {:name "viewport"
            :content "width=device-width, initial-scale=1"}]
-   (include-css (if (env :dev) "/css/site.css" "/css/site.min.css"))
-   [:link {:type        "text/css"
-           :href        (str "https://use.fontawesome.com/releases/v5.0.10/"
-                             "css/all.css")
-           :rel         "stylesheet"
-           :integrity   (str "sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOK"
-                             "mrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg")
-           :crossorigin "anonymous"}]
-   [:link {:rel         "stylesheet"
-           :href        (str "https://cdnjs.cloudflare.com/ajax/libs/bulma/"
-                             "0.7.1/css/bulma.min.css")
-           :integrity   "sha256-zIG416V1ynj3Wgju/scU80KAEWOsO5rRLfVyRDuOv7Q="
-           :crossorigin "anonymous"}]
-   [:link {:rel         "stylesheet"
-           :href        (str "https://cdn.jsdelivr.net/npm/"
-                             "bulma-extensions@1.0.20/bulma-slider/dist/"
-                             "bulma-slider.min.css")}]
-   [:link {:rel         "stylesheet"
-           :href        (str "https://cdnjs.cloudflare.com/ajax/libs/"
-                             "animate.css/3.5.2/animate.min.css")
-           :integrity   "sha256-j+P6EZJVrbXgwSR5Mx+eCS6FvP9Wq27MBRC/ogVriY0="
-           :crossorigin "anonymous"}]])
+   (include-css (if (env :dev) "/css/site.css" "/css/site.min.css"))])
 
 (defn loading-page []
   (html5

@@ -3,7 +3,7 @@
             [sokoban.events :as events]
             [sokoban.subs :as subs]))
 
-(def cell-size 40)
+(def cell-size 44)
 
 (defn fa-icon [icon-class size color]
   [:span.icon {:style {:font-size size}}
@@ -12,13 +12,13 @@
             :aria-hidden true}]])
 
 (defn cell [cell-type]
-  [:div.cell.has-text-centered
+  [:div.cell.button.is-static
    {:class (case cell-type
              "#" "wall"
              "@" "player"
              "." "target"
              "*" "target-complete"
-             "$" "block"
+             "$" "movable-block"
              nil)
     :style {:width cell-size
             :height cell-size}}
