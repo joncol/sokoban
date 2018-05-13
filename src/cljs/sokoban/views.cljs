@@ -75,10 +75,10 @@
         show      (rf/subscribe [::subs/show-congratulations-screen])]
     [:div
      [:div
-      {:hidden (not @completed)}
+      {:style {:visibility (when (not @completed) "hidden")}}
       [:button.button
        {:on-click #(rf/dispatch [::events/show-congratulations-screen true])}
-       "Congratulations"]]
+       "Congratulations!"]]
      [:div.modal.animated.fadeIn
       {:class (when (and @completed (not (false? @show))) "is-active")}
       [:div.modal-background
@@ -104,7 +104,7 @@
          [:button.button "Replay"]]]]]]))
 
 (defn game []
-  [:div
+  [:div.animated.pulse
    [board]
    [move-history]
    [level-complete-screen]])
