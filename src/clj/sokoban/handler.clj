@@ -1,8 +1,12 @@
 (ns sokoban.handler
-  (:require [compojure.core :refer [GET defroutes]]
+  (:require [clojure.tools.logging :as log]
+            [compojure.core :refer [GET defroutes]]
             [compojure.route :refer [not-found resources]]
             [config.core :refer [env]]
             [hiccup.page :refer [include-js include-css html5]]
+            [org.httpkit.client :as http-client]
+            [ring.util.response :as resp]
+            [sokoban.game-sokoban-parser :refer [extract-level]]
             [sokoban.middleware :refer [wrap-middleware]]))
 
 (def mount-target
@@ -24,7 +28,11 @@
 
 (defroutes routes
   (GET "/" [] (loading-page))
-  (GET "/about" [] (loading-page))
+  (GET "/level/:id" [id]
+    (let [resp @(http-client/get (str "http://www.game-sokoban.com/"
+                                      "index.php?mode=level_info&view=general")
+                                 {:query-params {:ulid id}})]
+      (resp/response (-> resp :body extract-level))))
   (resources "/")
   (not-found "Not Found"))
 

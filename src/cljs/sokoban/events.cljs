@@ -1,7 +1,10 @@
 (ns sokoban.events
-  (:require [clojure.string :as str]
+  (:require [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]]
+            [clojure.string :as str]
             [re-frame.core :as rf]
-            [sokoban.game-util :refer [block-positions make-move pad-vec]]))
+            [sokoban.game-util :refer [block-positions make-move pad-vec]])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (rf/reg-event-db
   ::level-changed
@@ -57,3 +60,17 @@
   [(rf/path [:show-congratulations-screen])]
   (fn [_ [_ show]]
     show))
+
+(rf/reg-event-fx
+  ::download-level
+  (fn [_ [_ id]]
+    {::download-level id}))
+
+(rf/reg-fx
+  ::download-level
+  (fn [id]
+    (go (let [response (<! (http/get (str "/level/" id)))
+              body     (-> response :body)]
+          (if (:success response)
+            (rf/dispatch [::level-changed body])
+            (rf/dispatch [::download-level-failed body]))))))

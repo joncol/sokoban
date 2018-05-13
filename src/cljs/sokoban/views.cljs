@@ -25,9 +25,9 @@
    (case cell-type
      "." [fa-icon "fa-expand" "25px" "#67809f"]
      "*" [fa-icon ["fa-trophy" "animated" "pulse"
-                   "anim-forever"] "25px"  "#f9bf3b"]
-     "$" [fa-icon "fa-trophy" "25px" "#f9bf3b"]
-     "@" [fa-icon "fa-bug" "25px" "#013243"]
+                   "anim-forever"] "35px"  "#f9bf3b"]
+     "$" [fa-icon "fa-trophy" "35px" "#f9bf3b"]
+     "@" [fa-icon "fa-bug" "40px" "#013243"]
      "#" nil
      cell-type)])
 
@@ -107,6 +107,8 @@
   [:div.animated.pulse
    [board]
    [move-history]
+   [:button.button {:on-click #(rf/dispatch [::events/download-level 200])}
+    "Download level"]
    [level-complete-screen]])
 
 (defn main-panel []
