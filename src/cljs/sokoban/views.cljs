@@ -13,10 +13,13 @@
 (defn board []
   (let [level (rf/subscribe [::subs/level])]
     [:div
-     (doall (for [y (range (count @level))]
-              ^{:key y}
-              [:div (doall (for [x (range (count (get @level y)))]
-                             ^{:key x} [cell (get-in @level [y x])]))]))]))
+     (doall
+      (for [y (range (count @level))]
+        ^{:key y}
+        [:div
+         (doall
+          (for [x (range (count (get @level y)))]
+            ^{:key x} [cell (get-in @level [y x])]))]))]))
 
 (defn move-history []
   (let [history-size (rf/subscribe [::subs/history-size])
