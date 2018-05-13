@@ -52,11 +52,17 @@
   (fn [_]
     [(rf/subscribe [::static-level])
      (rf/subscribe [::player-pos])
-     (rf/subscribe [::movable-blocks])])
-  (fn [[static-level player-pos movable-blocks]]
+     (rf/subscribe [::movable-blocks])
+     (rf/subscribe [::target-positions])])
+  (fn [[static-level player-pos movable-blocks target-positions]]
     (-> static-level
         (as-> l
-            (reduce #(assoc-in %1 %2 "$") l movable-blocks))
+            (reduce (fn [l block-pos]
+                      (assoc-in l block-pos
+                                (if (some #(= block-pos %) target-positions)
+                                  "!"
+                                  "$")))
+                    l movable-blocks))
         (assoc-in player-pos "@"))))
 
 (rf/reg-sub
@@ -72,11 +78,9 @@
 (rf/reg-sub
   ::level-completed
   (fn [_]
-    [(rf/subscribe [::remaining-count])
-     (rf/subscribe [::congratulations-screen-hidden])])
-  (fn [[remaining-count congratulations-screen-hidden]]
-    (and (zero? remaining-count)
-         (not congratulations-screen-hidden))))
+    (rf/subscribe [::remaining-count]))
+  (fn [remaining-count]
+    (zero? remaining-count)))
 
 (rf/reg-sub
   ::history-size

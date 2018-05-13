@@ -5,10 +5,30 @@
 
 (def cell-size 40)
 
+(defn fa-icon [icon-class size color]
+  [:span {:style {:font-size size}}
+   [:i.fas {:class       icon-class
+            :style       {:color color}
+            :aria-hidden true}]])
+
 (defn cell [cell-type]
-  [:span.button {:style {:width cell-size
-                         :height cell-size}}
-   cell-type])
+  [:span.button
+   {:class (if (= "#" cell-type) "is-dark")
+    :style {:width cell-size
+            :height cell-size
+            :border-style "dotted"
+            :border-width "1px"
+            :margin-right -1
+            :margin-bottom -1
+            :border-color "#a0a0a0"}}
+   (case cell-type
+     "." [fa-icon "fa-expand" "25px" "#a0a0a0"]
+     "!" [fa-icon ["fa-trophy" "animated" "pulse"
+                   "anim-forever"] "25px" "#013243"]
+     "$" [fa-icon "fa-trophy" "25px" "#013243"]
+     "@" [fa-icon "fa-bug" "28px" "#F9BF3B"]
+     "#" nil
+     cell-type)])
 
 (defn board []
   (let [level (rf/subscribe [::subs/level])]
