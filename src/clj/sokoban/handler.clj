@@ -9,6 +9,8 @@
             [sokoban.game-sokoban-parser :refer [extract-level]]
             [sokoban.middleware :refer [wrap-middleware]]))
 
+(def level-cache (atom {}))
+
 (def mount-target
   [:div#app])
 
@@ -29,10 +31,17 @@
 (defroutes routes
   (GET "/" [] (loading-page))
   (GET "/level/:id" [id]
-    (let [resp @(http-client/get (str "http://www.game-sokoban.com/"
-                                      "index.php?mode=level_info&view=general")
-                                 {:query-params {:ulid id}})]
-      (resp/response (-> resp :body extract-level))))
+    (if (contains? @level-cache id)
+      (do
+        (log/debug "Returning cached level:" id)
+        (resp/response (@level-cache id)))
+      (let [resp  @(http-client/get (str "http://www.game-sokoban.com/"
+                                         "index.php?mode=level_info&view=general")
+                                    {:query-params {:ulid id}})
+            level (-> resp :body extract-level)]
+        (log/debug "Downloaded level from http://www.game-sokoban.com:" id)
+        (swap! level-cache assoc id level)
+        (resp/response level))))
   (resources "/")
   (not-found "Not Found"))
 
