@@ -8,6 +8,10 @@
        (filter #(pred (second %))
                (map-indexed vector coll))))
 
+(defn pad-vec [v width]
+  (let [n (count (take-while #(= " " %) v))]
+    (vec (concat (repeat n "#") (drop n v) (repeat (- width (count v)) "#")))))
+
 (defn block-positions [level block]
   (->> (for [y (find-value #(str/includes? % block) level)]
          (map #(-> [y %]) (find-value #(= % block) (get level y))))

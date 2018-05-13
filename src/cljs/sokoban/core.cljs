@@ -1,11 +1,13 @@
 (ns sokoban.core
-  (:require [reagent.core :as r]
+  (:require [clojure.string :as str]
             [re-frame.core :as rf]
             [re-pressed.core :as rp]
+            [reagent.core :as r]
+            [sokoban.config :as config]
             [sokoban.events :as events]
             [sokoban.routes :as routes]
-            [sokoban.views :as views]
-            [sokoban.config :as config]))
+            [sokoban.slurp :include-macros true :refer [slurp]]
+            [sokoban.views :as views]))
 
 (defn dev-setup []
   (when config/debug?
@@ -30,7 +32,8 @@
 
 (defn ^:export init! []
   (routes/app-routes)
-  (rf/dispatch-sync [::events/initialize-db])
+  (let [level (str/split (slurp "resources/level01.txt") #"\n")]
+    (rf/dispatch-sync [::events/level-changed level]))
   (rf/dispatch-sync [::rp/add-keyboard-event-listener "keydown"])
   (setup-keys)
   (dev-setup)

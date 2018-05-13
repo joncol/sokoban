@@ -1,12 +1,22 @@
 (ns sokoban.events
-  (:require [re-frame.core :as rf]
-            [sokoban.db :as db]
-            [sokoban.game-util :refer [make-move]]))
+  (:require [clojure.string :as str]
+            [re-frame.core :as rf]
+            [sokoban.game-util :refer [block-positions make-move pad-vec]]))
 
 (rf/reg-event-db
-  ::initialize-db
-  (fn [_ _]
-    db/default-db))
+  ::level-changed
+  (fn [db [_ level]]
+    (let [width        (count (apply max-key count level))
+          static-level (mapv (fn [row]
+                               (pad-vec (str/replace row #"[@$]" " ")
+                                        width))
+                             level)]
+      (-> db
+          (assoc :static-level static-level
+                 :target-positions (block-positions level ".")
+                 :player-position-history [(first (block-positions level "@"))]
+                 :movable-blocks-history [(block-positions level "$")]
+                 :current-move 0)))))
 
 (rf/reg-event-db
   ::make-move
