@@ -32,8 +32,7 @@
 
 (defn ^:export init! []
   (routes/app-routes)
-  (let [level (str/split (slurp "resources/level01.txt") #"\n")]
-    (rf/dispatch-sync [::events/level-changed level]))
+  (rf/dispatch-sync [::events/download-catalogs])
   (rf/dispatch-sync [::rp/add-keyboard-event-listener "keydown"])
   (setup-keys)
   (dev-setup)

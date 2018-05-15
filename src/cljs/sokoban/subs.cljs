@@ -1,5 +1,6 @@
 (ns sokoban.subs
-  (:require [re-frame.core :as rf]))
+  (:require [re-frame.core :as rf]
+            [clojure.set :as set]))
 
 ;; This is a map.
 (rf/reg-sub
@@ -21,9 +22,27 @@
     (mapv (partial get catalogs) order)))
 
 (rf/reg-sub
-  ::current-catalog
+  ::current-catalog-id
   (fn [db]
-    (:current-catalog db)))
+    (:current-catalog-id db)))
+
+(rf/reg-sub
+  ::catalog-levels
+  (fn [db]
+    (:catalog-levels db)))
+
+(rf/reg-sub
+  ::current-catalog-levels
+  (fn [_]
+    [(rf/subscribe [::catalog-levels])
+     (rf/subscribe [::current-catalog-id])])
+  (fn [[catalog-levels catalog-id]]
+    (get catalog-levels catalog-id)))
+
+(rf/reg-sub
+  ::current-level-id
+  (fn [db]
+    (:current-level-id db)))
 
 (rf/reg-sub
   ::static-level
@@ -95,16 +114,17 @@
     [(rf/subscribe [::movable-blocks])
      (rf/subscribe [::target-positions])])
   (fn [[movable-blocks target-positions]]
-    (->> target-positions
-         (remove #(some (fn [p] (= p %)) movable-blocks))
-         count)))
+    (count (set/difference (set target-positions)
+                           (set movable-blocks)))))
 
 (rf/reg-sub
   ::level-completed
   (fn [_]
-    (rf/subscribe [::remaining-count]))
-  (fn [remaining-count]
-    (zero? remaining-count)))
+    [(rf/subscribe [::current-level-id])
+     (rf/subscribe [::remaining-count])])
+  (fn [[current-level-id remaining-count]]
+    (and current-level-id
+         (zero? remaining-count))))
 
 (rf/reg-sub
   ::history-size

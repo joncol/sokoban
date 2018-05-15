@@ -43,10 +43,12 @@
             ^{:key x} [cell (get-in @level [y x])]))]))]))
 
 (defn move-history []
-  (let [history-size (rf/subscribe [::subs/history-size])
-        current-move (rf/subscribe [::subs/current-move])]
-    [:div
-     {:style {:width "280px"}}
+  (let [current-level-id (rf/subscribe [::subs/current-level-id])
+        history-size     (rf/subscribe [::subs/history-size])
+        current-move     (rf/subscribe [::subs/current-move])]
+    [:div.has-text-centered
+     {:style {:visibility (when-not @current-level-id "hidden")
+              :width "280px"}}
      [:label (str "Current move: " @current-move " ")]
      [:div
       [:span.icon.button.is-medium.is-rounded
@@ -66,7 +68,7 @@
       {:type     "range"
        :min      0
        :max      (dec @history-size)
-       :value    @current-move
+       :value    (or @current-move "")
        :on-input #(rf/dispatch [::events/set-current-move
                                 (-> % .-target .-value int)])}]]))
 
@@ -82,15 +84,15 @@
      [:div.modal.animated.fadeIn
       {:class (when (and @completed (not (false? @show))) "is-active")}
       [:div.modal-background
-       {:on-click #(rf/dispatch [::events/show-about false])}]
+       {:on-click #(rf/dispatch [::events/show-congratulations-screen false])}]
       [:div#about-screen.modal-card.has-text-centered.is-rounded
        {:style {:width "400px"}}
        [:header.modal-card-head
         [:p.modal-card-title.is-centered.animated.fadeInLeft "Congratulations!"]
         [:button.delete.is-medium
          {:aria-label "close"
-          :on-click #(rf/dispatch [::events/show-congratulations-screen false])}]
-        ]
+          :on-click #(rf/dispatch
+                      [::events/show-congratulations-screen false])}]]
        [:div.modal-card-body
         [:p
          " Level completed "
@@ -103,12 +105,45 @@
          [:button.button "Next level"]
          [:button.button "Replay"]]]]]]))
 
+(defn catalog-dropdown []
+  (let [catalogs (rf/subscribe [::subs/catalog-list])]
+    (when (seq @catalogs)
+      [:div.field.is-horizontal.control
+       [:div.field-label.is-normal
+        [:label.label {:style {:white-space "nowrap"}} "Level pack"]]
+       [:div.field-body
+        [:div.field.is-narrow
+         [:div.control
+          [:div.select
+           [:select {:on-change #(rf/dispatch [::events/set-catalog
+                                               (-> % .-target .-value)])}
+            (for [c @catalogs]
+              ^{:key (:id c)}[:option {:value (:id c)} (:name c)])]]]]]])))
+
+(defn level-dropdown []
+  (let [levels (rf/subscribe [::subs/current-catalog-levels])]
+    [:div.field.is-horizontal.control
+     [:div.field-label.is-normal
+      [:label.label {:style {:white-space "nowrap"}} "Level"]]
+     [:div.field-body
+      [:div.field.is-narrow
+       [:div.control
+        [:div.select
+         [:select {:on-change #(rf/dispatch [::events/download-level
+                                             (-> % .-target .-value)])}
+          (for [l @levels]
+            ^{:key (:id l)}[:option {:value (:id l)} (:name l)])]]]]]]))
+
+(defn- level-selection []
+  [:div
+   [catalog-dropdown]
+   [level-dropdown]])
+
 (defn game []
-  [:div.animated.pulse
+  [:div
    [board]
    [move-history]
-   [:button.button {:on-click #(rf/dispatch [::events/download-level 200])}
-    "Download level"]
+   [level-selection]
    [level-complete-screen]])
 
 (defn main-panel []

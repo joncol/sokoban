@@ -7,21 +7,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (rf/reg-event-db
-  ::level-changed
-  (fn [db [_ level]]
-    (let [width        (count (apply max-key count level))
-          static-level (mapv (fn [row]
-                               (pad-vec (str/replace row #"[@$]" " ")
-                                        width))
-                             level)]
-      (-> db
-          (assoc :static-level static-level
-                 :target-positions (block-positions level ".")
-                 :player-position-history [(first (block-positions level "@"))]
-                 :movable-blocks-history [(block-positions level "$")]
-                 :current-move 0)))))
-
-(rf/reg-event-db
   ::make-move
   (fn [{:keys [static-level
                player-position-history
@@ -63,11 +48,11 @@
 
 (rf/reg-event-fx
   ::download-catalogs
-  (fn [cofx _]
-    {::download-catalogs-fx nil}))
+  (fn [_ _]
+    {::download-catalogs nil}))
 
 (rf/reg-fx
-  ::download-catalogs-fx
+  ::download-catalogs
   (fn []
     (go (let [response (<! (http/get "/catalogs"))
               body     (-> response :body)]
@@ -75,13 +60,36 @@
             (rf/dispatch [::download-catalogs-succeeded body])
             (rf/dispatch [::download-catalogs-failed body]))))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   ::download-catalogs-succeeded
-  (fn [db [_ catalogs]]
-    (assoc db
-           :catalogs (zipmap (map :id catalogs) catalogs)
-           :catalog-order (map :id catalogs)
-           :current-catalog (first catalogs))))
+  (fn [{:keys [db]} [_ catalogs]]
+    {:db (assoc db
+                :catalogs (zipmap (map :id catalogs) catalogs)
+                :catalog-order (map :id catalogs))
+     :dispatch [::set-catalog (-> catalogs first :id)]}))
+
+(rf/reg-event-fx
+  ::set-catalog
+  (fn [{:keys [db]} [_ id]]
+    (-> {:db (assoc db :current-catalog-id id)}
+        (as-> fx
+            (if-not (get-in db [:catalog-levels id])
+              (assoc fx ::download-catalog-levels id)
+              fx)))))
+
+(rf/reg-fx
+  ::download-catalog-levels
+  (fn [id]
+    (go (let [response (<! (http/get (str "/catalog/" id)))
+              body     (-> response :body)]
+          (if (:success response)
+            (rf/dispatch [::download-catalog-levels-succeeded id body])
+            (rf/dispatch [::download-catalog-levels-failed id body]))))))
+
+(rf/reg-event-fx
+  ::download-catalog-levels-succeeded
+  (fn [{:keys [db]} [_ catalog-id levels]]
+    {:db (assoc-in db [:catalog-levels catalog-id] levels)}))
 
 (rf/reg-event-fx
   ::download-level
@@ -94,5 +102,26 @@
     (go (let [response (<! (http/get (str "/level/" id)))
               body     (-> response :body)]
           (if (:success response)
-            (rf/dispatch [::level-changed body])
-            (rf/dispatch [::download-level-failed body]))))))
+            (rf/dispatch [::download-level-succeeded id body])
+            (rf/dispatch [::download-level-failed id body]))))))
+
+(rf/reg-event-db
+  ::download-level-succeeded
+  (fn [db [_ id level]]
+    (let [width        (count (apply max-key count level))
+          static-level (mapv (fn [row]
+                               (-> row
+                                   (str/replace #"[@$]" " ")
+                                   (str/replace #"\*" ".")
+                                   (pad-vec width)))
+                             level)]
+      (-> db
+          (assoc :current-level-id id
+                 :static-level static-level
+                 :target-positions (vec (concat (block-positions level ".")
+                                                (block-positions level "*")))
+                 :player-position-history [(first (block-positions level "@"))]
+                 :movable-blocks-history [(vec (concat
+                                                (block-positions level "$")
+                                                (block-positions level "*")))]
+                 :current-move 0)))))
