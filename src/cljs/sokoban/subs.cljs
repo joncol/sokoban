@@ -1,6 +1,30 @@
 (ns sokoban.subs
   (:require [re-frame.core :as rf]))
 
+;; This is a map.
+(rf/reg-sub
+  ::catalogs
+  (fn [db]
+    (:catalogs db)))
+
+(rf/reg-sub
+  ::catalog-order
+  (fn [db]
+    (:catalog-order db)))
+
+(rf/reg-sub
+  ::catalog-list
+  (fn [_]
+    [(rf/subscribe [::catalogs])
+     (rf/subscribe [::catalog-order])])
+  (fn [[catalogs order]]
+    (mapv (partial get catalogs) order)))
+
+(rf/reg-sub
+  ::current-catalog
+  (fn [db]
+    (:current-catalog db)))
+
 (rf/reg-sub
   ::static-level
   (fn [db]

@@ -62,6 +62,28 @@
     show))
 
 (rf/reg-event-fx
+  ::download-catalogs
+  (fn [cofx _]
+    {::download-catalogs-fx nil}))
+
+(rf/reg-fx
+  ::download-catalogs-fx
+  (fn []
+    (go (let [response (<! (http/get "/catalogs"))
+              body     (-> response :body)]
+          (if (:success response)
+            (rf/dispatch [::download-catalogs-succeeded body])
+            (rf/dispatch [::download-catalogs-failed body]))))))
+
+(rf/reg-event-db
+  ::download-catalogs-succeeded
+  (fn [db [_ catalogs]]
+    (assoc db
+           :catalogs (zipmap (map :id catalogs) catalogs)
+           :catalog-order (map :id catalogs)
+           :current-catalog (first catalogs))))
+
+(rf/reg-event-fx
   ::download-level
   (fn [_ [_ id]]
     {::download-level id}))

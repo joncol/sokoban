@@ -6,9 +6,11 @@
             [hiccup.page :refer [include-js include-css html5]]
             [org.httpkit.client :as http-client]
             [ring.util.response :as resp]
-            [sokoban.game-sokoban-parser :refer [extract-level]]
+            [sokoban.game-sokoban-parser :refer [extract-catalogs
+                                                 extract-level]]
             [sokoban.middleware :refer [wrap-middleware]]))
 
+(def catalog-list-cache (atom []))
 (def level-cache (atom {}))
 
 (def mount-target
@@ -30,6 +32,21 @@
 
 (defroutes routes
   (GET "/" [] (loading-page))
+  (GET "/catalogs" _
+    (if (seq @catalog-list-cache)
+      (do
+        (log/debug "Returning cached catalog list")
+        (resp/response @catalog-list-cache))
+      (let [resp @(http-client/get (str "http://www.game-sokoban.com/"
+                                        "index.php?mode=catalog"))]
+        (if (:error resp)
+          (do (log/error (str "Failed to download catalogs from "
+                              "http://www.game-sokoban.com: " (:error resp)))
+              (resp/response resp))
+          (let [catalogs (-> resp :body extract-catalogs)]
+            (log/debug "Downloaded catalogs from http://www.game-sokoban.com")
+            (reset! catalog-list-cache catalogs)
+            (resp/response catalogs))))))
   (GET "/level/:id" [id]
     (if (contains? @level-cache id)
       (do
