@@ -1,12 +1,6 @@
 (ns sokoban.game-util
-  (:require [clojure.string :as str]))
-
-(defn- find-value
-  "Find indices of value matching predicate in sequence."
-  [pred coll]
-  (map first
-       (filter #(pred (second %))
-               (map-indexed vector coll))))
+  (:require [clojure.string :as str]
+            [sokoban.util :refer [find-value]]))
 
 (defn pad-vec [v width]
   (let [n (count (take-while #(= " " %) v))]
