@@ -36,7 +36,8 @@
         (log/debug "Returning cached level:" id)
         (resp/response (@level-cache id)))
       (let [resp  @(http-client/get (str "http://www.game-sokoban.com/"
-                                         "index.php?mode=level_info&view=general")
+                                         "index.php?mode=level_info"
+                                         "&view=general")
                                     {:query-params {:ulid id}})
             level (-> resp :body extract-level)]
         (log/debug "Downloaded level from http://www.game-sokoban.com:" id)
