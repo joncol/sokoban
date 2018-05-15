@@ -3,7 +3,7 @@
             [sokoban.events :as events]
             [sokoban.subs :as subs]))
 
-(def cell-size 44)
+(def cell-size 36)
 
 (defn fa-icon [icon-class size color]
   [:span.icon {:style {:font-size size}}
@@ -23,11 +23,11 @@
     :style {:width cell-size
             :height cell-size}}
    (case cell-type
-     "." [fa-icon "fa-expand" "25px" "#67809f"]
+     "." [fa-icon "fa-expand" "20px" "#67809f"]
      "*" [fa-icon ["fa-trophy" "animated" "pulse"
-                   "anim-forever"] "35px"  "#f9bf3b"]
-     "$" [fa-icon "fa-trophy" "35px" "#f9bf3b"]
-     "@" [fa-icon "fa-bug" "40px" "#013243"]
+                   "anim-forever"] "28px" "#f9bf3b"]
+     "$" [fa-icon "fa-trophy" "28px" "#f9bf3b"]
+     "@" [fa-icon "fa-bug" "30px" "#013243"]
      "#" nil
      cell-type)])
 
