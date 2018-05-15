@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css?family=Indie+Flower");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css");
 @import url("https://cdn.jsdelivr.net/npm/bulma-extensions@1.0.28/bulma-slider/dist/bulma-slider.min.css");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
@@ -10,7 +9,7 @@ body {
   height: 100%; }
 
 .body-container {
-  font-family: "Indie Flower", sans-serif;
+  font-family: "Helvetica Neue", Verdana, Helvetica, Arial, sans-serif;
   margin: 0 auto;
   padding-top: 72px;
   -webkit-font-smoothing: antialiased;
