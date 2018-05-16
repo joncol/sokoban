@@ -13,17 +13,19 @@
                movable-blocks-history
                current-move] :as db}
        [_ dir]]
-    (let [pos (get player-position-history current-move)
-          blocks (get movable-blocks-history current-move)
-          [new-pos new-blocks] (make-move pos dir static-level blocks)]
-      (if (= new-pos pos)
-        db
-        (-> db
-            (update :player-position-history
-                    #(conj (subvec % 0 (inc current-move)) new-pos))
-            (update :movable-blocks-history
-                    #(conj (subvec % 0 (inc current-move)) new-blocks))
-            (update :current-move inc))))))
+    (if (seq static-level)
+      (let [pos (get player-position-history current-move)
+            blocks (get movable-blocks-history current-move)
+            [new-pos new-blocks] (make-move pos dir static-level blocks)]
+        (if (= new-pos pos)
+          db
+          (-> db
+              (update :player-position-history
+                      #(conj (subvec % 0 (inc current-move)) new-pos))
+              (update :movable-blocks-history
+                      #(conj (subvec % 0 (inc current-move)) new-blocks))
+              (update :current-move inc))))
+      db)))
 
 (rf/reg-event-db
   ::set-current-move
