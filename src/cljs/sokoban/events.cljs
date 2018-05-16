@@ -112,7 +112,7 @@
           static-level (mapv (fn [row]
                                (-> row
                                    (str/replace #"[@$]" " ")
-                                   (str/replace #"\*" ".")
+                                   (str/replace #"[*+]" ".")
                                    (pad-vec width)))
                              level)]
       (-> db
@@ -120,7 +120,9 @@
                  :static-level static-level
                  :target-positions (vec (concat (block-positions level ".")
                                                 (block-positions level "*")))
-                 :player-position-history [(first (block-positions level "@"))]
+                 :player-position-history
+                 [(or (first (block-positions level "@"))
+                      (first (block-positions level "+")))]
                  :movable-blocks-history [(vec (concat
                                                 (block-positions level "$")
                                                 (block-positions level "*")))]
