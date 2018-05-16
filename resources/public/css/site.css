@@ -10,14 +10,13 @@ body {
 
 .body-container {
   font-family: "Helvetica Neue", Verdana, Helvetica, Arial, sans-serif;
-  margin: 0 auto;
   padding-top: 72px;
+  padding-left: 72px;
   -webkit-font-smoothing: antialiased;
   font-size: 1.125em;
   color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  white-space: nowrap;
+  overflow: scroll;
   background: radial-gradient(ellipse at center, #f0f9ff 0%, #cbebff 25%, #a1dbff 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr = '#f0f9ff', endColorstr = '#a1dbff', GradientType = 1); }
 

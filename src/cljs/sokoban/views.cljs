@@ -46,7 +46,7 @@
   (let [current-level-id (rf/subscribe [::subs/current-level-id])
         history-size     (rf/subscribe [::subs/history-size])
         current-move     (rf/subscribe [::subs/current-move])]
-    [:div.has-text-centered
+    [:div
      {:style {:visibility (when-not @current-level-id "hidden")
               :width "280px"}}
      [:label (str "Current move: " @current-move " ")]
@@ -135,7 +135,7 @@
             ^{:key (:id l)}[:option {:value (:id l)} (:name l)])]]]]]]))
 
 (defn- level-selection []
-  [:div
+  [:div {:style {:width "540px"}}
    [catalog-dropdown]
    [level-dropdown]])
 

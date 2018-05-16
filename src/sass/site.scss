@@ -15,14 +15,13 @@ body {
 
 .body-container {
     font-family: $font-stack;
-    margin: 0 auto;
     padding-top: 72px;
+    padding-left: 72px;
     -webkit-font-smoothing: antialiased;
     font-size: $base-font-size;
     color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    white-space: nowrap;
+    overflow: scroll;
 
     background: radial-gradient(ellipse at center,
                                 rgba(240, 249, 255, 1) 0%,
