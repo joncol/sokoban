@@ -75,9 +75,9 @@
   (fn [{:keys [db]} [_ id]]
     (-> {:db (assoc db :current-catalog-id id)}
         (as-> fx
-            (if-not (get-in db [:catalog-levels id])
-              (assoc fx ::download-catalog-levels id)
-              fx)))))
+            (if-let [levels (get-in db [:catalog-levels id])]
+              (assoc fx ::download-level (-> levels first :id))
+              (assoc fx ::download-catalog-levels id))))))
 
 (rf/reg-fx
   ::download-catalog-levels
@@ -91,7 +91,8 @@
 (rf/reg-event-fx
   ::download-catalog-levels-succeeded
   (fn [{:keys [db]} [_ catalog-id levels]]
-    {:db (assoc-in db [:catalog-levels catalog-id] levels)}))
+    {:db (assoc-in db [:catalog-levels catalog-id] levels)
+     ::download-level (-> levels first :id)}))
 
 (rf/reg-event-fx
   ::download-level
