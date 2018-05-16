@@ -28,7 +28,17 @@
                   [[::events/make-move :up]
                    [{:which 75}] [{:which 38}]]
                   [[::events/make-move :down]
-                   [{:which 74}] [{:which 40}]]]}]))
+                   [{:which 74}] [{:which 40}]]]
+     :always-listen-keys (when-not config/debug?
+                           [{:which 72} {:which 37}
+                            {:which 76} {:which 39}
+                            {:which 75} {:which 38}
+                            {:which 74} {:which 40}])
+     :prevent-default-keys (when-not config/debug?
+                             [{:which 72} {:which 37}
+                              {:which 76} {:which 39}
+                              {:which 75} {:which 38}
+                              {:which 74} {:which 40}])}]))
 
 (defn ^:export init! []
   (routes/app-routes)
