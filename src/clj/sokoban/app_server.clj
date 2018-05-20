@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
-            [ring.adapter.jetty :as jetty]))
+            [ring.server.standalone :refer :all]))
 
 (defrecord AppServer [handler-fn port server]
   component/Lifecycle
@@ -11,7 +11,10 @@
       (do (log/info "Starting app server component")
           (let [deps    (keys (component/dependencies this))
                 handler (handler-fn (zipmap deps (map (partial get this) deps)))
-                server  (jetty/run-jetty handler {:port port :join? false})]
+                server  (serve handler
+                               {:port         port
+                                :auto-reload? true
+                                :join?        false})]
             (assoc this :server server)))
       this))
   (stop [this]
