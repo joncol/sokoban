@@ -33,7 +33,7 @@
             [lein-environ "1.1.0"]]
   :min-lein-version "2.5.3"
   :uberjar-name "sokoban.jar"
-  :main sokoban.main
+  :main ^:skip-aot sokoban.main
 
   :clean-targets ^{:protect false}
   ["resources/public/css/site.css"
@@ -89,17 +89,17 @@
                                   [com.cemerick/piggieback "0.2.2"]
                                   [com.stuartsierra/component.repl "0.2.0"]
                                   [day8.re-frame/re-frame-10x "0.3.3-react16"]
-                                  [figwheel-sidecar "0.5.15"]
+                                  [figwheel-sidecar "0.5.16"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [pjstadig/humane-test-output "0.8.3"]
                                   [prone "1.5.2"]
                                   [ring/ring-devel "1.6.3"]
                                   [ring/ring-mock "0.3.2"]]
-                   :jvm-opts ["-Dloglevel=ALL"]
+                   :jvm-opts ["-Dloglevel=INFO"]
                    :source-paths ["dev" "env/dev/clj"]
-                   :plugins [[lein-figwheel "0.5.15"]
-                             [cider/cider-nrepl "0.15.1"]
+                   :plugins [[lein-figwheel "0.5.16"]
+                             [cider/cider-nrepl "0.16.0"]
                              [org.clojure/tools.namespace "0.3.0-alpha4"
                               :exclusions [org.clojure/tools.reader]]
                              [refactor-nrepl "2.3.1"
