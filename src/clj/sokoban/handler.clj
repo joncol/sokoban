@@ -6,6 +6,7 @@
             [hiccup.page :refer [include-js include-css html5]]
             [org.httpkit.client :as http-client]
             [ring.util.response :as resp]
+            [sokoban.cache :refer [set-catalog-list]]
             [sokoban.game-sokoban-parser :refer [extract-catalog-list
                                                  extract-catalog
                                                  extract-level
@@ -45,7 +46,7 @@
                (resp/response resp))
            (let [catalogs (-> resp :body extract-catalog-list)]
              (log/debug "Downloaded catalogs from http://www.game-sokoban.com")
-             (reset! (:catalog-list cache) catalogs)
+             (set-catalog-list cache catalogs)
              (resp/response catalogs))))))
    (GET "/catalog/:id" [id]
      (if (contains? @(:catalogs cache) id)

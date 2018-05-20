@@ -1,6 +1,10 @@
 (ns sokoban.cache
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]))
+
+(declare load-catalog-list)
 
 (defrecord Cache []
   component/Lifecycle
@@ -8,7 +12,7 @@
     (if-not (:catalog-list this)
       (do (log/info "Starting cache component")
           (assoc this
-                 :catalog-list (atom [])
+                 :catalog-list (atom (load-catalog-list))
                  :catalogs (atom {})
                  :levels (atom {})))
       this))
@@ -23,3 +27,14 @@
 
 (defn new-cache []
   (Cache.))
+
+(defn load-catalog-list []
+  (let [filename "cache/catalog-list.edn"]
+    (if (.exists (io/as-file filename))
+      (edn/read-string (slurp (io/resource filename)))
+      [])))
+
+(defn set-catalog-list [cache catalog-list]
+  (reset! (:catalog-list cache) catalog-list)
+  (with-open [w (io/writer "resources/cache/catalog-list.edn")]
+    (.write w (str catalog-list))))
