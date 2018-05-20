@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[camel-snake-kebab "0.4.0"]
                  [cljs-http "0.1.45"]
+                 [com.stuartsierra/component "0.3.2"]
                  [compojure "1.6.1"]
                  [hiccup "1.0.5"]
                  [hickory "0.7.1"]
@@ -19,6 +20,7 @@
                  [re-frame "0.10.5"]
                  [re-pressed "0.2.0"]
                  [ring "1.6.3"]
+                 [ring-logger "1.0.1"]
                  [ring-server "0.5.0"]
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
@@ -31,7 +33,7 @@
             [lein-environ "1.1.0"]]
   :min-lein-version "2.5.3"
   :uberjar-name "sokoban.jar"
-  :main sokoban.server
+  :main sokoban.main
 
   :clean-targets ^{:protect false}
   ["resources/public/css/site.css"
@@ -77,23 +79,25 @@
                       "cider.nrepl/cider-middleware"
                       "refactor-nrepl.middleware/wrap-refactor"]
    :css-dirs         ["resources/public/css"]
-   :ring-handler     sokoban.handler/app}
+   :ansi-color-output false}
   :sass {:src              "src/sass"
          :output-directory "resources/public/css"}
-  :profiles {:dev {:repl-options {:init-ns sokoban.repl
+  :profiles {:dev {:repl-options {:init-ns user
                                   :nrepl-middleware
                                   [cemerick.piggieback/wrap-cljs-repl]}
                    :dependencies [[binaryage/devtools "0.9.10"]
                                   [com.cemerick/piggieback "0.2.2"]
+                                  [com.stuartsierra/component.repl "0.2.0"]
                                   [day8.re-frame/re-frame-10x "0.3.3-react16"]
                                   [figwheel-sidecar "0.5.15"]
+                                  [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [pjstadig/humane-test-output "0.8.3"]
                                   [prone "1.5.2"]
                                   [ring/ring-devel "1.6.3"]
                                   [ring/ring-mock "0.3.2"]]
                    :jvm-opts ["-Dloglevel=ALL"]
-                   :source-paths ["env/dev/clj"]
+                   :source-paths ["dev" "env/dev/clj"]
                    :plugins [[lein-figwheel "0.5.15"]
                              [cider/cider-nrepl "0.15.1"]
                              [org.clojure/tools.namespace "0.3.0-alpha4"

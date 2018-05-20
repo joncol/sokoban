@@ -1,6 +1,6 @@
 (ns sokoban.handler
   (:require [clojure.tools.logging :as log]
-            [compojure.core :refer [GET defroutes]]
+            [compojure.core :refer [GET routes]]
             [compojure.route :refer [not-found resources]]
             [config.core :refer [env]]
             [hiccup.page :refer [include-js include-css html5]]
@@ -10,12 +10,7 @@
                                                  extract-catalog
                                                  extract-level
                                                  extract-catalog-page-count]]
-            [sokoban.middleware :refer [wrap-middleware]]
-            [sokoban.util :refer [find-value]]))
-
-(def catalog-list-cache (atom []))
-(def catalog-cache (atom {}))
-(def level-cache (atom {}))
+            [sokoban.middleware :refer [wrap-middleware]]))
 
 (def mount-target
   [:div#app])
@@ -34,63 +29,66 @@
     mount-target
     (include-js "/js/app.js")]))
 
-(defroutes routes
-  (GET "/" [] (loading-page))
-  (GET "/catalogs" _
-    (if (seq @catalog-list-cache)
-      (do
-        (log/debug "Returning cached catalog list")
-        (resp/response @catalog-list-cache))
-      (let [resp @(http-client/get (str "http://www.game-sokoban.com/"
-                                        "index.php?mode=catalog"))]
-        (if (:error resp)
-          (do (log/error (str "Failed to download catalogs from "
-                              "http://www.game-sokoban.com: " (:error resp)))
-              (resp/response resp))
-          (let [catalogs (-> resp :body extract-catalog-list)]
-            (log/debug "Downloaded catalogs from http://www.game-sokoban.com")
-            (reset! catalog-list-cache catalogs)
-            (resp/response catalogs))))))
-  (GET "/catalog/:id" [id]
-    (if (contains? @catalog-cache id)
-      (do
-        (log/debug "Returning cached catalog:" id)
-        (resp/response (@catalog-cache id)))
-      (let [page-size  24
-            page-count (-> @(http-client/get
-                             (str "http://www.game-sokoban.com/index.php"
-                                  "?mode=catalog")
-                             {:query-params {:cid  id
-                                             :page 1
-                                             :q    page-size}})
-                           :body
-                           extract-catalog-page-count)]
-        (-> (reduce (fn [levels page]
-                      (concat levels
-                              (-> @(http-client/get
-                                    (str "http://www.game-sokoban.com/index.php"
-                                         "?mode=catalog")
-                                    {:query-params {:cid  id
-                                                    :page (inc page)
-                                                    :q    page-size}})
-                                  :body
-                                  extract-catalog)))
-                    [] (range page-count))
-            resp/response))))
-  (GET "/level/:id" [id]
-    (if (contains? @level-cache id)
-      (do
-        (log/debug "Returning cached level:" id)
-        (resp/response (@level-cache id)))
-      (let [resp  @(http-client/get (str "http://www.game-sokoban.com/"
+(defn routes-wrapper [cache]
+  (routes
+   (GET "/" [] (loading-page))
+   (GET "/catalogs" _
+     (if (seq @(:catalog-list cache))
+       (do
+         (log/debug "Returning cached catalog list")
+         (resp/response @(:catalog-list cache)))
+       (let [resp @(http-client/get (str "http://www.game-sokoban.com/"
+                                         "index.php?mode=catalog"))]
+         (if (:error resp)
+           (do (log/error (str "Failed to download catalogs from "
+                               "http://www.game-sokoban.com: " (:error resp)))
+               (resp/response resp))
+           (let [catalogs (-> resp :body extract-catalog-list)]
+             (log/debug "Downloaded catalogs from http://www.game-sokoban.com")
+             (reset! (:catalog-list cache) catalogs)
+             (resp/response catalogs))))))
+   (GET "/catalog/:id" [id]
+     (if (contains? @(:catalogs cache) id)
+       (do
+         (log/debug "Returning cached catalog:" id)
+         (resp/response (@(:catalogs cache) id)))
+       (let [page-size  24
+             page-count (-> @(http-client/get
+                              (str "http://www.game-sokoban.com/index.php"
+                                   "?mode=catalog")
+                              {:query-params {:cid  id
+                                              :page 1
+                                              :q    page-size}})
+                            :body
+                            extract-catalog-page-count)]
+         (-> (reduce (fn [levels page]
+                       (concat levels
+                               (-> @(http-client/get
+                                     (str "http://www.game-sokoban.com/index.php"
+                                          "?mode=catalog")
+                                     {:query-params {:cid  id
+                                                     :page (inc page)
+                                                     :q    page-size}})
+                                   :body
+                                   extract-catalog)))
+                     [] (range page-count))
+             resp/response))))
+   (GET "/level/:id" [id]
+     (if (contains? @(:levels cache) id)
+       (do
+         (log/debug "Returning cached level:" id)
+         (resp/response (@(:levels cache) id)))
+       (let [resp @(http-client/get (str "http://www.game-sokoban.com/"
                                          "index.php?mode=level_info"
                                          "&view=general")
                                     {:query-params {:ulid id}})
-            level (-> resp :body extract-level)]
-        (log/debug "Downloaded level from http://www.game-sokoban.com:" id)
-        (swap! level-cache assoc id level)
-        (resp/response level))))
-  (resources "/")
-  (not-found "Not Found"))
+             level (-> resp :body extract-level)]
+         (log/debug "Downloaded level from http://www.game-sokoban.com:" id)
+         (swap! (:levels cache) assoc id level)
+         (resp/response level))))
+   (resources "/")
+   (not-found "Not Found")))
 
-(def app (wrap-middleware #'routes))
+(defn app-fn [{:keys [cache]}]
+  (-> (routes-wrapper cache)
+      wrap-middleware))
