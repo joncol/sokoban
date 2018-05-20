@@ -5,6 +5,7 @@
             [com.stuartsierra.component :as component]))
 
 (declare load-catalog-list)
+(declare load-levels)
 
 (defrecord Cache []
   component/Lifecycle
@@ -14,7 +15,7 @@
           (assoc this
                  :catalog-list (atom (load-catalog-list))
                  :catalogs (atom {})
-                 :levels (atom {})))
+                 :levels (atom (load-levels))))
       this))
   (stop [this]
     (if (:catalog-list this)
@@ -34,7 +35,34 @@
       (edn/read-string (slurp (io/resource filename)))
       [])))
 
-(defn set-catalog-list [cache catalog-list]
+(defn set-catalog-list! [cache catalog-list]
+  (log/debug "Caching catalog list")
   (reset! (:catalog-list cache) catalog-list)
   (with-open [w (io/writer "resources/cache/catalog-list.edn")]
     (.write w (str catalog-list))))
+
+(defn get-level [cache id]
+  (let [level (get @(:levels cache) id)]
+    (cond
+      (nil? level)    nil
+      (delay? level)  (do (log/debug "Loading and returning cached level:" id)
+                          @level)
+      (string? level) (do (log/debug "Returning cached level:" id)
+                          level))))
+
+(defn add-level! [cache id level]
+  (log/debug "Caching level, ID:" id)
+  (swap! (:levels cache) assoc id level)
+  (with-open [w (io/writer (str "resources/cache/levels/" id ".edn"))]
+    (.write w (str level))))
+
+(defn load-levels []
+  (reduce (fn [levels f]
+            (if-let [[_ id] (and (.isFile f)
+                                 (re-matches #"(\d+)\.edn" (.getName f)))]
+              (assoc levels
+                     (Integer/parseInt id)
+                     (delay (edn/read-string (slurp f))))
+              levels))
+          {}
+          (.listFiles (clojure.java.io/file "resources/cache/levels"))))
