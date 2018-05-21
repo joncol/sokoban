@@ -121,8 +121,7 @@
       (-> db
           (assoc :current-level-id id
                  :static-level static-level
-                 :target-positions (vec (concat (block-positions level ".")
-                                                (block-positions level "*")))
+                 :target-positions (vec (block-positions static-level "."))
                  :player-position-history
                  [(or (first (block-positions level "@"))
                       (first (block-positions level "+")))]
