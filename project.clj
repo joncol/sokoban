@@ -15,6 +15,7 @@
                  [org.clojure/clojurescript "1.10.238" :scope "provided"]
                  [org.clojure/data.codec "0.1.1"]
                  [org.clojure/tools.logging "0.4.0"]
+                 [org.slf4j/slf4j-log4j12 "1.7.25"]
                  [reagent "0.8.0"]
                  [reagent-utils "0.3.1"]
                  [re-frame "0.10.5"]
