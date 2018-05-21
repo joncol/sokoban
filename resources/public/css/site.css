@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Vollkorn");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css");
 @import url("https://cdn.jsdelivr.net/npm/bulma-extensions@1.0.28/bulma-slider/dist/bulma-slider.min.css");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
@@ -9,7 +10,7 @@ body {
   height: 100%; }
 
 .body-container {
-  font-family: "Helvetica Neue", Verdana, Helvetica, Arial, sans-serif;
+  font-family: "Vollkorn", Verdana, Helvetica, Arial, sans-serif;
   padding-top: 72px;
   padding-left: 72px;
   -webkit-font-smoothing: antialiased;

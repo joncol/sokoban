@@ -2,7 +2,9 @@
 // .css files. Partials (files starting with "_") can be included using @import.
 // (import path can include "_", but it is not needed).
 
-$font-stack: 'Helvetica Neue', Verdana, Helvetica, Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css?family=Vollkorn');
+
+$font-stack: 'Vollkorn', Verdana, Helvetica, Arial, sans-serif;
 $base-font-size: 1.125em;
 
 html {
