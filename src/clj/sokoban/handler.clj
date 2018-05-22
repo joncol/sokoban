@@ -6,7 +6,8 @@
             [hiccup.page :refer [include-js include-css html5]]
             [org.httpkit.client :as http-client]
             [ring.util.response :as resp]
-            [sokoban.cache :refer [set-catalog-list! get-level add-level!]]
+            [sokoban.cache :refer [add-catalog! add-level! get-catalog get-level
+                                   set-catalog-list!]]
             [sokoban.game-sokoban-parser :refer [extract-catalog-list
                                                  extract-catalog
                                                  extract-level
@@ -29,6 +30,29 @@
    [:body {:class "body-container"}
     mount-target
     (include-js "/js/app.js")]))
+
+(defn- build-catalog [id]
+  (let [page-size  24
+        page-count (-> @(http-client/get
+                         (str "http://www.game-sokoban.com/index.php"
+                              "?mode=catalog")
+                         {:query-params {:cid  id
+                                         :page 1
+                                         :q    page-size}})
+                       :body
+                       extract-catalog-page-count)]
+    (vec (reduce
+          (fn [levels page]
+            (concat levels
+                    (-> @(http-client/get (str "http://www.game-sokoban.com/"
+                                               "index.php?mode=catalog")
+                                          {:query-params {:cid  id
+                                                          :page (inc page)
+                                                          :q    page-size}})
+                        :body
+                        extract-catalog)))
+          []
+          (range page-count)))))
 
 (defn routes-wrapper [cache]
   (routes
@@ -53,28 +77,10 @@
        (if (contains? @(:catalogs cache) id)
          (do
            (log/debug "Returning cached catalog:" id)
-           (resp/response (@(:catalogs cache) id)))
-         (let [page-size  24
-               page-count (-> @(http-client/get
-                                (str "http://www.game-sokoban.com/index.php"
-                                     "?mode=catalog")
-                                {:query-params {:cid  id
-                                                :page 1
-                                                :q    page-size}})
-                              :body
-                              extract-catalog-page-count)]
-           (-> (reduce (fn [levels page]
-                         (concat levels
-                                 (-> @(http-client/get
-                                       (str "http://www.game-sokoban.com/"
-                                            "index.php?mode=catalog")
-                                       {:query-params {:cid  id
-                                                       :page (inc page)
-                                                       :q    page-size}})
-                                     :body
-                                     extract-catalog)))
-                       [] (range page-count))
-               resp/response)))))
+           (resp/response (get-catalog cache id)))
+         (let [catalog (build-catalog id)]
+           (add-catalog! cache id catalog)
+           (resp/response catalog)))))
    (GET "/level/:id" [id]
      (let [id (Integer/parseInt id)]
        (if (contains? @(:levels cache) id)
