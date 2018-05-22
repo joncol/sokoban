@@ -5,8 +5,9 @@
 
 (def cell-size 36)
 
-(defn fa-icon [icon-class size color]
-  [:span.icon {:style {:font-size size}}
+(defn fa-icon [icon-class size color & [id]]
+  [:span.icon {:id    id
+               :style {:font-size size}}
    [:i.fas {:class       icon-class
             :style       {:color color}
             :aria-hidden true}]])
@@ -27,13 +28,13 @@
      "*" [fa-icon ["fa-trophy" "animated" "pulse"
                    "anim-forever"] "28px" "#f9bf3b"]
      "$" [fa-icon "fa-trophy" "28px" "#f9bf3b"]
-     "@" [fa-icon "fa-bug" "30px" "#013243"]
+     "@" [fa-icon "fa-bug" "30px" "#013243" "player"]
      "#" nil
      cell-type)])
 
 (defn board []
   (let [level (rf/subscribe [::subs/level])]
-    [:div
+    [:div#board
      (doall
       (for [y (range (count @level))]
         ^{:key y}
