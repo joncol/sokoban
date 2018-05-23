@@ -7,6 +7,20 @@
 
 (def cell-size 36)
 
+(defn about-link []
+  [:button.button.is-warning
+   {:on-click #(secretary/dispatch! "/about")} "About"])
+
+(defn navbar []
+  [:nav.navbar.is-warning {:role "navigation"
+                           :aria-label "main navigation"}
+   [:div.navbar-brand.animated.swing
+    [:div.button.title.is-warning
+     {:on-click #(secretary/dispatch! "/")} "Sokoban"]]
+   [:div.navbar-menu.is-active
+    [:div.navbar-end
+     [:div.navbar-item [about-link]]]]])
+
 (defn fa-icon [icon-class size color & [id]]
   [:span.icon {:id    id
                :style {:font-size size}}
@@ -237,12 +251,45 @@
    [catalog-dropdown]
    [level-dropdown]])
 
-(defn game []
-  [:div#game
+(defn home-panel []
+  [:div.game-container
    [board]
    [move-history]
    [level-selection]
    [congratulations]])
 
+(defn about-panel []
+  [:div.about-container
+   [:p "This admittedly completely unoriginal game was made by Jonas Collberg "
+    "using ClojureScript, with a little Clojure on the server. I also used the "
+    "sweet sweet "
+    [:a {:href "https://github.com/Day8/re-frame"} "re-frame"]
+    " library."]
+   [:p "For style, I used " [:a {:href "https://bulma.io"} "Bulma"]
+    ", plus some " [:a {:href "https://wikiki.github.io"} "extensions"] "."]
+   [:p "Levels were blatantly borrowed from G. Tamolyunas' excellent "
+    [:a {:href "http://www.game-sokoban.com"} "site"] "."]
+   [:p "A repository with all the source code for this game is available at "
+    [:i.fab.fa-github
+     {:aria-hidden true
+      :style {:margin-left "3px"}}] ": "
+    [:a {:href "https://github.com/joncol/sokoban"}
+     "https://github.com/joncol/sokoban"] "."]
+   [:div.is-divider]
+   [:div
+    [:button.button.is-info {:on-click #(secretary/dispatch! "/")} "Go back"]]])
+
+(defn- panels [panel-name]
+  (case panel-name
+    :home-panel [home-panel]
+    :about-panel [about-panel]
+    [:div]))
+
+(defn show-panel [panel-name]
+  [panels panel-name])
+
 (defn main-panel []
-  [game])
+  [:div.div
+   [navbar]
+   (let [active-panel (rf/subscribe [::subs/active-panel])]
+     [show-panel @active-panel])])

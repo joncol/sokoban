@@ -5,10 +5,22 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [re-frame.core :as rf]
+            [sokoban.db :as db]
             [sokoban.game-util :refer [block-positions make-move pad-vec]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def level-state-key "level-state")
+
+(rf/reg-event-db
+  ::initialize-db
+  (fn [_ _]
+    db/default-db))
+
+(rf/reg-event-db
+  ::set-active-panel
+  [(rf/path [:active-panel])]
+  (fn [_ [_ new-value]]
+    new-value))
 
 (rf/reg-event-db
   ::load-level-state

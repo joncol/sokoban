@@ -2,7 +2,11 @@
   (:require [re-frame.core :as rf]
             [clojure.set :as set]))
 
-;; This is a map.
+(rf/reg-sub
+  ::active-panel
+  (fn [db]
+    (:active-panel db)))
+
 (rf/reg-sub
   ::catalogs
   (fn [db]
