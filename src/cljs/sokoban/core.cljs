@@ -54,6 +54,7 @@
 
 (defn ^:export init! []
   (routes/app-routes)
+  (rf/dispatch-sync [::events/load-level-state])
   (rf/dispatch-sync [::events/download-catalogs])
   (rf/dispatch-sync [::rp/add-keyboard-event-listener "keydown"])
   (setup-keys)

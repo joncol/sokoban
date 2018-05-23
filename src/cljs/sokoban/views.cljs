@@ -81,11 +81,14 @@
 (defn move-history []
   (let [current-level-id (rf/subscribe [::subs/current-level-id])
         history-size     (rf/subscribe [::subs/history-size])
-        current-move     (rf/subscribe [::subs/current-move])]
+        current-move     (rf/subscribe [::subs/current-move])
+        level-record     (rf/subscribe [::subs/current-level-record])]
     [:div
      {:style {:visibility (when-not @current-level-id "hidden")
               :width      "280px"}}
-     [:label (str "Current move: " @current-move " ")]
+     [:label (str "Current move: " @current-move
+                  (when @level-record
+                    (str " (record: " @level-record " moves)")))]
      [:div
       [:span.icon.button.is-medium.is-rounded
        {:on-click #(rf/dispatch [::events/set-current-move 0])}
@@ -108,38 +111,34 @@
        :on-input #(rf/dispatch [::events/set-current-move
                                 (-> % .-target .-value int)])}]]))
 
-(defn level-complete-screen []
-  (let [completed (rf/subscribe [::subs/level-completed])
-        show      (rf/subscribe [::subs/show-congratulations-screen])]
-    [:div
-     [:div
-      {:style {:visibility (when (not @completed) "hidden")}}
-      [:button.button
-       {:on-click #(rf/dispatch [::events/show-congratulations-screen true])}
-       "Congratulations!"]]
-     [:div.modal.animated.fadeIn
-      {:class (when (and @completed (not (false? @show))) "is-active")}
-      [:div.modal-background
-       {:on-click #(rf/dispatch [::events/show-congratulations-screen false])}]
-      [:div#about-screen.modal-card.has-text-centered.is-rounded
-       {:style {:width "400px"}}
-       [:header.modal-card-head
-        [:p.modal-card-title.is-centered.animated.fadeInLeft "Congratulations!"]
-        [:button.delete.is-medium
-         {:aria-label "close"
-          :on-click #(rf/dispatch
-                      [::events/show-congratulations-screen false])}]]
-       [:div.modal-card-body
-        [:p
-         " Level completed "
-         [:i.fas.fa-heart.animated.pulse.anim-forever
-          {:aria-hidden true
-           :style {:color       "red"
-                   :margin-left "3px"}}]]]
-       [:footer.modal-card-foot
-        [:div.buttons
-         [:button.button "Next level"]
-         [:button.button "Replay"]]]]]]))
+(defn congratulations []
+  (let [finished? (rf/subscribe [::subs/level-finished])
+        new-record? (rf/subscribe [::subs/new-level-record])]
+    [:div.modal.animated.fadeIn
+     {:class (when (or @finished? @new-record?) "is-active")}
+     [:div.modal-background
+      {:on-click #(rf/dispatch [::events/show-congratulations-screen false])}]
+     [:div#about-screen.modal-card.has-text-centered.is-rounded
+      {:style {:width "400px"}}
+      [:header.modal-card-head
+       [:p.modal-card-title.is-centered.animated.fadeInLeft
+        (if @finished? "Congratulations!" "Well done!")]
+       [:button.delete.is-medium
+        {:aria-label "close"
+         :on-click #(rf/dispatch [::events/close-congratulations-screen])}]]
+      [:div.modal-card-body
+       [:p (if @finished? "Level completed " "New level record ")
+        [:i.fas.animated
+         {:class (if @finished?
+                   "fa-heart pulse anim-forever"
+                   "fa-thumbs-up bounceIn")
+          :aria-hidden true
+          :style {:color       (if @finished? "red" "#26a65b")
+                  :margin-left "3px"}}]]]
+      [:footer.modal-card-foot
+       [:div.buttons
+        [:button.button "Next level"]
+        [:button.button "Replay"]]]]]))
 
 (defn catalog-dropdown []
   (let [catalogs (rf/subscribe [::subs/catalog-list])]
@@ -180,7 +179,7 @@
    [board]
    [move-history]
    [level-selection]
-   [level-complete-screen]])
+   [congratulations]])
 
 (defn main-panel []
   [game])

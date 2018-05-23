@@ -1,31 +1,71 @@
 (ns sokoban.events
   (:require [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
+            [cljs.reader :refer [read-string]]
+            [clojure.set :as set]
             [clojure.string :as str]
             [re-frame.core :as rf]
             [sokoban.game-util :refer [block-positions make-move pad-vec]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
+(def ls-key "jco-sokoban")
+
 (rf/reg-event-db
+  ::load-level-state
+  [(rf/path [:level-state])]
+  (fn [_ _]
+    (read-string (.getItem js/localStorage ls-key))))
+
+(rf/reg-event-fx
   ::make-move
-  (fn [{:keys [static-level
-               player-position-history
-               movable-blocks-history
-               current-move] :as db}
-       [_ dir]]
-    (if (seq static-level)
-      (let [pos (get player-position-history current-move)
-            blocks (get movable-blocks-history current-move)
-            [new-pos new-blocks] (make-move pos dir static-level blocks)]
-        (if (= new-pos pos)
-          db
-          (-> db
-              (update :player-position-history
-                      #(conj (subvec % 0 (inc current-move)) new-pos))
-              (update :movable-blocks-history
-                      #(conj (subvec % 0 (inc current-move)) new-blocks))
-              (update :current-move inc))))
-      db)))
+  (fn [{:keys [db]} [_ dir]]
+    (let [{:keys [static-level
+                  target-positions
+                  player-position-history
+                  movable-blocks-history
+                  current-move
+                  current-level-id
+                  level-state]} db]
+      (when (seq static-level)
+        (let [pos (get player-position-history current-move)
+              blocks (get movable-blocks-history current-move)
+              [new-pos new-blocks] (make-move pos dir static-level blocks)
+              p-pos-h (-> db
+                          :player-position-history
+                          (as-> h
+                              (conj (subvec h 0 (inc current-move)) new-pos)))
+              m-b-h (-> db
+                        :movable-blocks-history
+                        (as-> h
+                            (conj (subvec h 0 (inc current-move)) new-blocks)))
+              remaining-count (count (set/difference (set target-positions)
+                                                     (set new-blocks)))]
+          (when-not (= new-pos pos)
+            (merge {:db (-> db
+                            (assoc :player-position-history p-pos-h)
+                            (assoc :movable-blocks-history m-b-h)
+                            (update :current-move inc))}
+                   (when (zero? remaining-count)
+                     {::level-finished [level-state current-level-id
+                                        p-pos-h m-b-h]}))))))))
+
+(rf/reg-fx
+  ::level-finished
+  (fn [[level-state id p-pos-h m-b-h]]
+    (let [move-count (dec (count p-pos-h))
+          status (get level-state id)
+          congrats? (or (nil? status) (< move-count (:move-count status)))]
+      (when congrats?
+        (rf/dispatch [(if status ::new-level-record ::level-finished)
+                      id move-count])
+        (-> level-state
+            (assoc id {:player-position-history p-pos-h
+                       :movable-blocks-history  m-b-h
+                       :move-count              move-count})
+            str
+            (as-> data
+                (.setItem js/localStorage ls-key data)))
+        (rf/dispatch [::load-level-state])))))
 
 (rf/reg-event-db
   ::set-current-move
@@ -43,10 +83,21 @@
                current-move)))))
 
 (rf/reg-event-db
-  ::show-congratulations-screen
-  [(rf/path [:show-congratulations-screen])]
-  (fn [_ [_ show]]
-    show))
+  ::level-finished
+  [(rf/path [:level-finished])]
+  (fn [_ [_ id move-count]]
+    move-count))
+
+(rf/reg-event-db
+  ::new-level-record
+  [(rf/path [:new-level-record])]
+  (fn [_ [_ id move-count]]
+    move-count))
+
+(rf/reg-event-db
+  ::close-congratulations-screen
+  (fn [db [_ _]]
+    (dissoc db :level-finished :new-level-record)))
 
 (rf/reg-event-fx
   ::download-catalogs
@@ -108,6 +159,11 @@
             (rf/dispatch [::download-level-succeeded id body])
             (rf/dispatch [::download-level-failed id body]))))))
 
+(defn- get-level-state [level-state id]
+  (-> level-state
+      (get id)
+      (set/rename-keys {:move-count :current-move})))
+
 (rf/reg-event-db
   ::download-level-succeeded
   (fn [db [_ id level]]
@@ -128,7 +184,8 @@
                  :movable-blocks-history [(vec (concat
                                                 (block-positions level "$")
                                                 (block-positions level "*")))]
-                 :current-move 0)))))
+                 :current-move 0)
+          (merge (get-level-state (:level-state db) id))))))
 
 (rf/reg-event-db
   ::touch-start

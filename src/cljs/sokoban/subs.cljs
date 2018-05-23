@@ -118,13 +118,27 @@
                            (set movable-blocks)))))
 
 (rf/reg-sub
-  ::level-completed
+  ::level-finished
+  (fn [db]
+    (:level-finished db)))
+
+(rf/reg-sub
+  ::new-level-record
+  (fn [db]
+    (:new-level-record db)))
+
+(rf/reg-sub
+  ::level-state
+  (fn [db]
+    (:level-state db)))
+
+(rf/reg-sub
+  ::current-level-record
   (fn [_]
     [(rf/subscribe [::current-level-id])
-     (rf/subscribe [::remaining-count])])
-  (fn [[current-level-id remaining-count]]
-    (and current-level-id
-         (zero? remaining-count))))
+     (rf/subscribe [::level-state])])
+  (fn [[level-id level-state]]
+    (get-in level-state [level-id :move-count])))
 
 (rf/reg-sub
   ::history-size
