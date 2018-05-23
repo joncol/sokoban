@@ -20,6 +20,8 @@
   ::make-move
   (fn [{:keys [db]} [_ dir]]
     (let [{:keys [static-level
+                  level-finished-first-time
+                  new-level-record
                   target-positions
                   player-position-history
                   movable-blocks-history
@@ -27,7 +29,9 @@
                   current-level-id
                   current-catalog-id
                   level-state]} db]
-      (when (seq static-level)
+      (when (and (seq static-level)
+                 (not level-finished-first-time)
+                 (not new-level-record))
         (let [pos (get player-position-history current-move)
               blocks (get movable-blocks-history current-move)
               [new-pos new-blocks] (make-move pos dir static-level blocks)
