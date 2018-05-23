@@ -194,13 +194,9 @@
                (let [active? (= @curr-cat-id (:id c))]
                  ^{:key (:id c)}
                  [:a.dropdown-item
-                  {:href     (str "#/catalog/" (:id c))
-                   :class    (when active? "is-active")
-                   :style    {:padding "2px 10px"}
-                   :on-click #(when active?
-                                (rf/dispatch
-                                 [::events/toggle-catalog-dropdown-active
-                                  false]))}
+                  {:href  (str "#/catalog/" (:id c))
+                   :class (when active? "is-active")
+                   :style {:padding "2px 10px"}}
                   (:name c)])))]]]]]])))
 
 (defn level-dropdown []
@@ -233,12 +229,9 @@
              (let [active? (= @curr-level-id (:id l))]
                ^{:key (:id l)}
                [:a.dropdown-item
-                {:href     (str "#/level/" (:id l))
-                 :class    (when active? "is-active")
-                 :style    {:padding "2px 10px"}
-                 :on-click #(when active?
-                              (rf/dispatch
-                               [::events/toggle-level-dropdown-active false]))}
+                {:href  (str "#/level/" (:id l))
+                 :class (when active? "is-active")
+                 :style {:padding "2px 10px"}}
                 [:span.icon.has-text-info
                  [:i.fas
                   {:class (if (:finished l) "fa-check-square" "fa-square")
