@@ -8235,7 +8235,7 @@ a {
   -o-animation-iteration-count: infinite; }
 
 .navbar-brand {
-  padding: 0 72px; }
+  padding: 0 24px; }
   .navbar-brand .button.title {
     height: auto;
     margin: 0;
@@ -8243,10 +8243,10 @@ a {
     background-color: transparent; }
 
 .game-container {
-  margin: 72px; }
+  padding: 24px; }
 
 .about-container {
-  margin: 72px;
+  margin: 24px;
   width: 33%;
   min-width: 340px;
   white-space: normal;
