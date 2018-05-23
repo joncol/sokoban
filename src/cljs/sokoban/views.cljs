@@ -262,10 +262,11 @@
     ", plus some " [:a {:href "https://wikiki.github.io"} "extensions"] "."]
    [:p "Levels were blatantly borrowed from G. Tamolyunas' excellent "
     [:a {:href "http://www.game-sokoban.com"} "site"] "."]
-   [:p "A repository with all the source code for this game is available at "
+   [:p "A repository with all the source code for this game is available at: "
+    [:br]
     [:i.fab.fa-github
      {:aria-hidden true
-      :style {:margin-left "3px"}}] ": "
+      :style {:margin "0 4px"}}]
     [:a {:href "https://github.com/joncol/sokoban"}
      "https://github.com/joncol/sokoban"] "."]
    [:div.is-divider]
