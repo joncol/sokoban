@@ -1,14 +1,14 @@
 (ns sokoban.game-util
   (:require [clojure.string :as str]
-            [sokoban.util :refer [find-value]]))
+            [sokoban.util :refer [find-value-indices]]))
 
 (defn pad-vec [v width]
   (let [n (count (take-while #(= " " %) v))]
     (vec (concat (repeat n "#") (drop n v) (repeat (- width (count v)) "#")))))
 
 (defn block-positions [level block]
-  (->> (for [y (find-value #(str/includes? % block) level)]
-         (map #(-> [y %]) (find-value #(= % block) (get level y))))
+  (->> (for [y (find-value-indices #(str/includes? % block) level)]
+         (map #(-> [y %]) (find-value-indices #(= % block) (get level y))))
        (apply concat)
        vec))
 
@@ -26,7 +26,8 @@
 
 (defn make-move [pos dir level movable-blocks]
   (let [new-pos       ((move-fn dir) pos)
-        movable-index (first (find-value #(= new-pos %) movable-blocks))]
+        movable-index (first (find-value-indices #(= new-pos %)
+                                                 movable-blocks))]
     (if (= "#" (get-in level new-pos))
       [pos movable-blocks]
       (if (not movable-index)
