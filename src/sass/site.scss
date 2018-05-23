@@ -7,6 +7,16 @@
 $font-stack: 'Vollkorn', Verdana, Helvetica, Arial, sans-serif;
 $base-font-size: 1.125em;
 
+@import "../../resources/bulma-0.7.0/sass/utilities/initial-variables";
+$dropdown-item-active-background-color: #E4F1FE;
+$dropdown-item-active-color: black;
+@import "../../resources/bulma-0.7.0/sass/utilities/functions";
+@import "../../resources/bulma-0.7.0/sass/utilities/derived-variables";
+@import "../../resources/bulma-0.7.0/bulma";
+@import url("https://cdn.jsdelivr.net/npm/bulma-extensions@1.0.28/bulma-slider/dist/bulma-slider.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
+@import url("https://use.fontawesome.com/releases/v5.0.10/css/all.css");
+
 html {
     height: 100%;
 }
@@ -92,8 +102,3 @@ a {
        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAG0lEQVQYV2NkYGD4z8DAwMgABXAGNgGwSgwVAFbmAgXQdISfAAAAAElFTkSuQmCC
     ) repeat;
 }
-
-@import url("https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css");
-@import url("https://cdn.jsdelivr.net/npm/bulma-extensions@1.0.28/bulma-slider/dist/bulma-slider.min.css");
-@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
-@import url("https://use.fontawesome.com/releases/v5.0.10/css/all.css")
