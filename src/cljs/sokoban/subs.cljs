@@ -110,11 +110,6 @@
     (:current-move db)))
 
 (rf/reg-sub
-  ::show-congratulations-screen
-  (fn [db]
-    (:show-congratulations-screen db)))
-
-(rf/reg-sub
   ::player-pos
   (fn [_]
     [(rf/subscribe [::player-position-history])
@@ -147,15 +142,6 @@
                                   "$")))
                     l movable-blocks))
         (assoc-in player-pos "@"))))
-
-(rf/reg-sub
-  ::remaining-count
-  (fn [_]
-    [(rf/subscribe [::movable-blocks])
-     (rf/subscribe [::target-positions])])
-  (fn [[movable-blocks target-positions]]
-    (count (set/difference (set target-positions)
-                           (set movable-blocks)))))
 
 (rf/reg-sub
   ::level-finished-first-time
