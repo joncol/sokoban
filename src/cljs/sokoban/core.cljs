@@ -17,9 +17,10 @@
   ISeqable
   (-seq [array] (array-seq array)))
 
-(extend-type js/TouchList
-  ISeqable
-  (-seq [array] (array-seq array)))
+(when config/touch-enabled?
+  (extend-type js/TouchList
+    ISeqable
+    (-seq [array] (array-seq array))))
 
 (defn dev-setup []
   (when config/debug?

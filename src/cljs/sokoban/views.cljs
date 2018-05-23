@@ -1,6 +1,7 @@
 (ns sokoban.views
   (:require [re-frame.core :as rf]
             [secretary.core :as secretary]
+            [sokoban.config :as config]
             [sokoban.events :as events]
             [sokoban.game-util :refer [elem-center]]
             [sokoban.subs :as subs]))
@@ -81,10 +82,14 @@
 (defn board []
   (let [level (rf/subscribe [::subs/level])
         delta (rf/subscribe [::subs/touch-delta])]
-    (handle-touch delta)
+    (when config/touch-enabled?
+      (handle-touch delta))
     [:div#board
-     {:on-touch-start #(rf/dispatch [::events/touch-start (copy-touch-event %)])
-      :on-touch-end   #(rf/dispatch [::events/touch-end (copy-touch-event %)])}
+     (when config/touch-enabled?
+       {:on-touch-start #(rf/dispatch [::events/touch-start
+                                       (copy-touch-event %)])
+        :on-touch-end   #(rf/dispatch [::events/touch-end
+                                       (copy-touch-event %)])})
      (doall
       (for [y (range (count @level))]
         ^{:key y}
