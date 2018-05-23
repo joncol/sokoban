@@ -1,5 +1,6 @@
 (ns sokoban.views
   (:require [re-frame.core :as rf]
+            [secretary.core :as secretary]
             [sokoban.events :as events]
             [sokoban.game-util :refer [elem-center]]
             [sokoban.subs :as subs]))
@@ -113,7 +114,8 @@
 
 (defn congratulations []
   (let [finished?   (rf/subscribe [::subs/level-finished])
-        new-record? (rf/subscribe [::subs/new-level-record])]
+        new-record? (rf/subscribe [::subs/new-level-record])
+        next-level  (rf/subscribe [::subs/next-unfinished-catalog-level-id])]
     [:div.modal.animated.fadeIn
      {:class (when @finished? "is-active")}
      [:div.modal-background
@@ -137,8 +139,15 @@
                   :margin-left "3px"}}]]]
       [:footer.modal-card-foot
        [:div.buttons
-        [:button.button "Next level"]
-        [:button.button "Replay"]]]]]))
+        [:button.button
+         {:disabled (not @next-level)
+          :on-click #(do (rf/dispatch
+                          [::events/close-congratulations-screen])
+                         (secretary/dispatch! (str "/level/" @next-level)))}
+         "Next unfinished level"]
+        [:button.button
+         {:on-click #(rf/dispatch [::events/close-congratulations-screen])}
+         "Replay"]]]]]))
 
 (defn catalog-dropdown []
   (let [catalogs        (rf/subscribe [::subs/catalog-list])
@@ -161,23 +170,24 @@
                              [::events/toggle-level-dropdown-active false])
                             (rf/dispatch
                              [::events/toggle-catalog-dropdown-active]))}
-            [:span @catalog-name]
+            [:span (or @catalog-name "N/A")]
             [:span.icon.is-small
              [:i.fas.fa-angle-down {:aria-hidden true}]]]]
           [:div#catalog-dropdown.dropdown-menu {:role "menu"}
            [:div.dropdown-content
-            (for [c @catalogs]
-              ^{:key (:id c)}
-              [:a.dropdown-item
-               {:href (str "#/catalog/" (:id c))
-                :class (when (= @curr-cat-id (:id c)) "is-active")
-                :style {:padding "2px 10px"}}
-               [:div [:span.icon.has-text-info
-                      [:i.fas.fa-star
-                       {:style {:visibility "hidden"
-                                :margin-right "5px"}
-                        :aria-hidden true}]]
-                (:name c)]])]]]]]])))
+            (doall
+             (for [c @catalogs]
+               (let [active? (= @curr-cat-id (:id c))]
+                 ^{:key (:id c)}
+                 [:a.dropdown-item
+                  {:href     (str "#/catalog/" (:id c))
+                   :class    (when active? "is-active")
+                   :style    {:padding "2px 10px"}
+                   :on-click #(when active?
+                                (rf/dispatch
+                                 [::events/toggle-catalog-dropdown-active
+                                  false]))}
+                  (:name c)])))]]]]]])))
 
 (defn level-dropdown []
   (let [levels          (rf/subscribe [::subs/current-catalog-levels])
@@ -199,23 +209,28 @@
                            [::events/toggle-catalog-dropdown-active false])
                           (rf/dispatch
                            [::events/toggle-level-dropdown-active]))}
-          [:span @level-name]
+          [:span (or @level-name "N/A")]
           [:span.icon.is-small
            [:i.fas.fa-angle-down {:aria-hidden true}]]]]
         [:div#level-dropdown.dropdown-menu {:role "menu"}
          [:div.dropdown-content
-          (for [l @levels]
-            ^{:key (:id l)}
-            [:a.dropdown-item
-             {:href (str "#/level/" (:id l))
-              :class (when (= @curr-level-id (:id l)) "is-active")
-              :style {:padding "2px 10px"}}
-             [:span.icon.has-text-info
-              [:i.fas
-               {:class (if (:finished l) "fa-check-square" "fa-square")
-                :style {:margin-right "5px"}
-                :aria-hidden true}]]
-             (:name l)])]]]]]]))
+          (doall
+           (for [l @levels]
+             (let [active? (= @curr-level-id (:id l))]
+               ^{:key (:id l)}
+               [:a.dropdown-item
+                {:href     (str "#/level/" (:id l))
+                 :class    (when active? "is-active")
+                 :style    {:padding "2px 10px"}
+                 :on-click #(when active?
+                              (rf/dispatch
+                               [::events/toggle-level-dropdown-active false]))}
+                [:span.icon.has-text-info
+                 [:i.fas
+                  {:class (if (:finished l) "fa-check-square" "fa-square")
+                   :style {:margin-right "5px"}
+                   :aria-hidden true}]]
+                (:name l)])))]]]]]]))
 
 (defn- level-selection []
   [:div {:style {:width "540px"}}

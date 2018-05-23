@@ -25,6 +25,7 @@
                   movable-blocks-history
                   current-move
                   current-level-id
+                  current-catalog-id
                   level-state]} db]
       (when (seq static-level)
         (let [pos (get player-position-history current-move)
@@ -47,11 +48,12 @@
                             (update :current-move inc))}
                    (when (zero? remaining-count)
                      {::level-finished [level-state current-level-id
+                                        current-catalog-id
                                         p-pos-h m-b-h]}))))))))
 
 (rf/reg-fx
   ::level-finished
-  (fn [[level-state id p-pos-h m-b-h]]
+  (fn [[level-state id catalog-id p-pos-h m-b-h]]
     (let [move-count (dec (count p-pos-h))
           status (get level-state id)
           congrats? (or (nil? status) (< move-count (:move-count status)))]
@@ -65,7 +67,8 @@
             str
             (as-> data
                 (.setItem js/localStorage level-state-key data)))
-        (rf/dispatch [::load-level-state])))))
+        (rf/dispatch [::load-level-state])
+        (rf/dispatch [::update-finished-catalog-levels catalog-id])))))
 
 (rf/reg-event-db
   ::set-current-move
@@ -142,12 +145,19 @@
 (rf/reg-event-fx
   ::download-catalog-levels-succeeded
   (fn [{:keys [db]} [_ catalog-id levels]]
-    {:db (assoc-in db [:catalog-levels catalog-id]
-                   (map #(assoc % :finished (get-in db [:level-state (:id %)]))
-                        levels))
+    {:db (assoc-in db [:catalog-levels catalog-id] levels)
      ::download-level (-> levels first :id)
      :dispatch-n [[::toggle-catalog-dropdown-active false]
-                  [::toggle-level-dropdown-active false]]}))
+                  [::toggle-level-dropdown-active false]
+                  [::update-finished-catalog-levels catalog-id]]}))
+
+(rf/reg-event-db
+  ::update-finished-catalog-levels
+  (fn [db [_ catalog-id]]
+    (update-in db [:catalog-levels catalog-id]
+               (fn [levels]
+                 (map #(assoc % :finished (get-in db [:level-state (:id %)]))
+                      levels)))))
 
 (rf/reg-event-fx
   ::download-level

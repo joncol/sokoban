@@ -64,6 +64,17 @@
          :name)))
 
 (rf/reg-sub
+  ::next-unfinished-catalog-level-id
+  (fn [_]
+    [(rf/subscribe [::catalog-levels])
+     (rf/subscribe [::current-catalog-id])])
+  (fn [[catalog-levels catalog-id]]
+    (->> (get catalog-levels catalog-id)
+         (filter #(not (:finished %)))
+         first
+         :id)))
+
+(rf/reg-sub
   ::catalog-dropdown-active
   (fn [db]
     (:catalog-dropdown-active db)))
