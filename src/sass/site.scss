@@ -17,8 +17,6 @@ body {
 
 .body-container {
     font-family: $font-stack;
-    padding-top: 72px;
-    padding-left: 72px;
     -webkit-font-smoothing: antialiased;
     font-size: $base-font-size;
     color: #333;
@@ -66,6 +64,16 @@ a {
     -webkit-animation-iteration-count: infinite;
     -moz-animation-iteration-count: infinite;
     -o-animation-iteration-count: infinite;
+}
+
+#game {
+    padding: 72px;
+}
+
+#board {
+    display: inline-block;
+    margin-right: 72px;
+    touch-action: none; // don't let browser handle touch events
 }
 
 .cell.button {

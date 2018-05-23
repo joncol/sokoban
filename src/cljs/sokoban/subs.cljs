@@ -132,3 +132,35 @@
     (rf/subscribe [::player-position-history]))
   (fn [player-position-history]
     (count player-position-history)))
+
+(rf/reg-sub
+  ::touch-start
+  (fn [db]
+    (:touch-start db)))
+
+(rf/reg-sub
+  ::touch-end
+  (fn [db]
+    (:touch-end db)))
+
+(rf/reg-sub
+  ::touch-delta
+  (fn [_]
+    [(rf/subscribe [::touch-start])
+     (rf/subscribe [::touch-end])])
+  (fn [[start end]]
+    (when-let [et (first end)]
+      (let [st      (->> start
+                         (filter #(= (:id et) (:id %)))
+                         first)
+            [ex ey] [(:page-x et) (:page-y et)]
+            [sx sy] [(:page-x st) (:page-y st)]
+            dx      (- ex sx)
+            dy      (- ey sy)]
+        {:start-x sx
+         :start-y sy
+         :end-x   ex
+         :end-y   ey
+         :delta-x dx
+         :delta-y dy
+         :dist    (Math/sqrt (+ (* dx dx) (* dy dy)))}))))

@@ -35,3 +35,12 @@
         (if (free-pos? level movable-blocks ((move-fn dir) new-pos))
           [new-pos (update movable-blocks movable-index (move-fn dir))]
           [pos movable-blocks])))))
+
+(defn elem-center
+  "Return the center of the bounding rect of a DOM element with a given ID."
+  [id]
+  (let [elem (js/document.getElementById id)
+        rect (.getBoundingClientRect elem)
+        x    (+ (.-x rect) (/ (.-width rect) 2))
+        y    (+ (.-y rect) (/ (.-height rect) 2))]
+    [x y]))

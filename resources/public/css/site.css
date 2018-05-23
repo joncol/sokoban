@@ -11,8 +11,6 @@ body {
 
 .body-container {
   font-family: "Vollkorn", Verdana, Helvetica, Arial, sans-serif;
-  padding-top: 72px;
-  padding-left: 72px;
   -webkit-font-smoothing: antialiased;
   font-size: 1.125em;
   color: #333;
@@ -44,6 +42,14 @@ a {
   -webkit-animation-iteration-count: infinite;
   -moz-animation-iteration-count: infinite;
   -o-animation-iteration-count: infinite; }
+
+#game {
+  padding: 72px; }
+
+#board {
+  display: inline-block;
+  margin-right: 72px;
+  touch-action: none; }
 
 .cell.button {
   border: none;

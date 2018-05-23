@@ -129,3 +129,23 @@
                                                 (block-positions level "$")
                                                 (block-positions level "*")))]
                  :current-move 0)))))
+
+(rf/reg-event-db
+  ::touch-start
+  (fn [db [_ event]]
+    (-> db
+        (assoc :touch-start event)
+        (assoc :touch-end nil))))
+
+(rf/reg-event-db
+  ::touch-end
+  [(rf/path [:touch-end])]
+  (fn [_ [_ event]]
+    event))
+
+(rf/reg-event-db
+  ::clear-touch
+  (fn [db _]
+    (-> db
+        (assoc :touch-start nil)
+        (assoc :touch-end nil))))

@@ -1,6 +1,7 @@
 (ns sokoban.views
   (:require [re-frame.core :as rf]
             [sokoban.events :as events]
+            [sokoban.game-util :refer [elem-center]]
             [sokoban.subs :as subs]))
 
 (def cell-size 36)
@@ -32,9 +33,43 @@
      "#" nil
      cell-type)])
 
+(defn move-along-major-axis [dx dy]
+  (if (< (Math/abs dx) (Math/abs dy))
+    (if (pos? dy)
+      (rf/dispatch [::events/make-move :down])
+      (rf/dispatch [::events/make-move :up]))
+    (if (pos? dx)
+      (rf/dispatch [::events/make-move :right])
+      (rf/dispatch [::events/make-move :left]))))
+
+(def drag-threshold 50)
+
+(defn handle-touch [delta]
+  (when-let [board-rect (some-> (js/document.getElementById "board")
+                                .getBoundingClientRect)]
+    (let [board-bottom (+ (.-y board-rect) (.-height board-rect))]
+      (when-let [{:keys [delta-x delta-y end-x end-y dist]} @delta]
+        (when (< end-y board-bottom)
+          (if (< dist drag-threshold)
+            (let [[px py] (elem-center "player")
+                  [dx dy] [(- end-x px) (- end-y py)]]
+              (move-along-major-axis dx dy))
+            (move-along-major-axis delta-x delta-y)))
+        (rf/dispatch [::events/clear-touch])))))
+
+(defn- copy-touch-event [event]
+  (doall (for [touch (.-changedTouches event)]
+           {:id (.-identifier touch)
+            :page-x (.-pageX touch)
+            :page-y (.-pageY touch)})))
+
 (defn board []
-  (let [level (rf/subscribe [::subs/level])]
+  (let [level (rf/subscribe [::subs/level])
+        delta (rf/subscribe [::subs/touch-delta])]
+    (handle-touch delta)
     [:div#board
+     {:on-touch-start #(rf/dispatch [::events/touch-start (copy-touch-event %)])
+      :on-touch-end   #(rf/dispatch [::events/touch-end (copy-touch-event %)])}
      (doall
       (for [y (range (count @level))]
         ^{:key y}
@@ -49,7 +84,7 @@
         current-move     (rf/subscribe [::subs/current-move])]
     [:div
      {:style {:visibility (when-not @current-level-id "hidden")
-              :width "280px"}}
+              :width      "280px"}}
      [:label (str "Current move: " @current-move " ")]
      [:div
       [:span.icon.button.is-medium.is-rounded
@@ -141,7 +176,7 @@
    [level-dropdown]])
 
 (defn game []
-  [:div
+  [:div#game
    [board]
    [move-history]
    [level-selection]
