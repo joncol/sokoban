@@ -17,4 +17,17 @@
 
 (defn app-routes []
   (secretary/set-config! :prefix "#")
+
+  (defroute "/" []
+    (rf/dispatch [::events/set-active-panel :home-panel]))
+
+  (defroute "/about" []
+    (rf/dispatch [::events/set-active-panel :about-panel]))
+
+  (defroute "/catalog/:id" [id]
+    (rf/dispatch [::events/set-catalog (js/parseInt id)]))
+
+  (defroute "/level/:id" [id]
+    (rf/dispatch [::events/download-level (js/parseInt id)]))
+
   (hook-browser-navigation!))

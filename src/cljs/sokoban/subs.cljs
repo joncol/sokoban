@@ -27,6 +27,14 @@
     (:current-catalog-id db)))
 
 (rf/reg-sub
+  ::current-catalog-name
+  (fn [_]
+    [(rf/subscribe [::current-catalog-id])
+     (rf/subscribe [::catalogs])])
+  (fn [[id catalogs]]
+    (get-in catalogs [id :name])))
+
+(rf/reg-sub
   ::catalog-levels
   (fn [db]
     (:catalog-levels db)))
@@ -43,6 +51,27 @@
   ::current-level-id
   (fn [db]
     (:current-level-id db)))
+
+(rf/reg-sub
+  ::current-level-name
+  (fn [_]
+    [(rf/subscribe [::current-level-id])
+     (rf/subscribe [::current-catalog-levels])])
+  (fn [[id catalog]]
+    (->> catalog
+         (filter #(= id (:id %)))
+         first
+         :name)))
+
+(rf/reg-sub
+  ::catalog-dropdown-active
+  (fn [db]
+    (:catalog-dropdown-active db)))
+
+(rf/reg-sub
+  ::level-dropdown-active
+  (fn [db]
+    (:level-dropdown-active db)))
 
 (rf/reg-sub
   ::static-level
@@ -118,14 +147,22 @@
                            (set movable-blocks)))))
 
 (rf/reg-sub
-  ::level-finished
+  ::level-finished-first-time
   (fn [db]
-    (:level-finished db)))
+    (:level-finished-first-time db)))
 
 (rf/reg-sub
   ::new-level-record
   (fn [db]
     (:new-level-record db)))
+
+(rf/reg-sub
+  ::level-finished
+  (fn [_]
+    [(rf/subscribe [::level-finished-first-time])
+     (rf/subscribe [::new-level-record])])
+  (fn [[finished record]]
+    (or finished record)))
 
 (rf/reg-sub
   ::level-state

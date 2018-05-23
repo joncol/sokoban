@@ -8,13 +8,13 @@
             [sokoban.game-util :refer [block-positions make-move pad-vec]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def ls-key "jco-sokoban")
+(def level-state-key "level-state")
 
 (rf/reg-event-db
   ::load-level-state
   [(rf/path [:level-state])]
   (fn [_ _]
-    (read-string (.getItem js/localStorage ls-key))))
+    (read-string (.getItem js/localStorage level-state-key))))
 
 (rf/reg-event-fx
   ::make-move
@@ -56,7 +56,7 @@
           status (get level-state id)
           congrats? (or (nil? status) (< move-count (:move-count status)))]
       (when congrats?
-        (rf/dispatch [(if status ::new-level-record ::level-finished)
+        (rf/dispatch [(if status ::new-level-record ::level-finished-first-time)
                       id move-count])
         (-> level-state
             (assoc id {:player-position-history p-pos-h
@@ -64,7 +64,7 @@
                        :move-count              move-count})
             str
             (as-> data
-                (.setItem js/localStorage ls-key data)))
+                (.setItem js/localStorage level-state-key data)))
         (rf/dispatch [::load-level-state])))))
 
 (rf/reg-event-db
@@ -83,8 +83,8 @@
                current-move)))))
 
 (rf/reg-event-db
-  ::level-finished
-  [(rf/path [:level-finished])]
+  ::level-finished-first-time
+  [(rf/path [:level-finished-first-time])]
   (fn [_ [_ id move-count]]
     move-count))
 
@@ -97,7 +97,7 @@
 (rf/reg-event-db
   ::close-congratulations-screen
   (fn [db [_ _]]
-    (dissoc db :level-finished :new-level-record)))
+    (dissoc db :level-finished-first-time :new-level-record)))
 
 (rf/reg-event-fx
   ::download-catalogs
@@ -142,8 +142,12 @@
 (rf/reg-event-fx
   ::download-catalog-levels-succeeded
   (fn [{:keys [db]} [_ catalog-id levels]]
-    {:db (assoc-in db [:catalog-levels catalog-id] levels)
-     ::download-level (-> levels first :id)}))
+    {:db (assoc-in db [:catalog-levels catalog-id]
+                   (map #(assoc % :finished (get-in db [:level-state (:id %)]))
+                        levels))
+     ::download-level (-> levels first :id)
+     :dispatch-n [[::toggle-catalog-dropdown-active false]
+                  [::toggle-level-dropdown-active false]]}))
 
 (rf/reg-event-fx
   ::download-level
@@ -164,9 +168,9 @@
       (get id)
       (set/rename-keys {:move-count :current-move})))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   ::download-level-succeeded
-  (fn [db [_ id level]]
+  (fn [{:keys [db]} [_ id level]]
     (let [width        (count (apply max-key count level))
           static-level (mapv (fn [row]
                                (-> row
@@ -174,18 +178,36 @@
                                    (str/replace #"[*+]" ".")
                                    (pad-vec width)))
                              level)]
-      (-> db
-          (assoc :current-level-id id
-                 :static-level static-level
-                 :target-positions (vec (block-positions static-level "."))
-                 :player-position-history
-                 [(or (first (block-positions level "@"))
-                      (first (block-positions level "+")))]
-                 :movable-blocks-history [(vec (concat
-                                                (block-positions level "$")
-                                                (block-positions level "*")))]
-                 :current-move 0)
-          (merge (get-level-state (:level-state db) id))))))
+      {:db (-> db
+               (assoc :current-level-id id
+                      :static-level static-level
+                      :target-positions (vec (block-positions static-level "."))
+                      :player-position-history
+                      [(or (first (block-positions level "@"))
+                           (first (block-positions level "+")))]
+                      :movable-blocks-history [(vec (concat
+                                                     (block-positions level "$")
+                                                     (block-positions level "*")))]
+                      :current-move 0)
+               (merge (get-level-state (:level-state db) id)))
+       :dispatch-n [[::toggle-level-dropdown-active false]
+                    [::toggle-catalog-dropdown-active false]]})))
+
+(rf/reg-event-db
+  ::toggle-catalog-dropdown-active
+  (fn [db [_ value]]
+    (update db :catalog-dropdown-active
+            (fn [x] (if (some? value)
+                      value
+                      (not x))))))
+
+(rf/reg-event-db
+  ::toggle-level-dropdown-active
+  (fn [db [_ value]]
+    (update db :level-dropdown-active
+            (fn [x] (if (some? value)
+                      value
+                      (not x))))))
 
 (rf/reg-event-db
   ::touch-start

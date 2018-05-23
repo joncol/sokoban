@@ -112,28 +112,28 @@
                                 (-> % .-target .-value int)])}]]))
 
 (defn congratulations []
-  (let [finished? (rf/subscribe [::subs/level-finished])
+  (let [finished?   (rf/subscribe [::subs/level-finished])
         new-record? (rf/subscribe [::subs/new-level-record])]
     [:div.modal.animated.fadeIn
-     {:class (when (or @finished? @new-record?) "is-active")}
+     {:class (when @finished? "is-active")}
      [:div.modal-background
-      {:on-click #(rf/dispatch [::events/show-congratulations-screen false])}]
+      {:on-click #(rf/dispatch [::events/close-congratulations-screen])}]
      [:div#about-screen.modal-card.has-text-centered.is-rounded
       {:style {:width "400px"}}
       [:header.modal-card-head
        [:p.modal-card-title.is-centered.animated.fadeInLeft
-        (if @finished? "Congratulations!" "Well done!")]
+        (if @new-record? "Well done!" "Congratulations!")]
        [:button.delete.is-medium
         {:aria-label "close"
          :on-click #(rf/dispatch [::events/close-congratulations-screen])}]]
       [:div.modal-card-body
-       [:p (if @finished? "Level completed " "New level record ")
+       [:p (if @new-record? "New level record " "Level completed ")
         [:i.fas.animated
-         {:class (if @finished?
-                   "fa-heart pulse anim-forever"
-                   "fa-thumbs-up bounceIn")
+         {:class (if @new-record?
+                   "fa-thumbs-up bounceIn"
+                   "fa-heart pulse anim-forever")
           :aria-hidden true
-          :style {:color       (if @finished? "red" "#26a65b")
+          :style {:color(if @new-record? "#26a65b" "red")
                   :margin-left "3px"}}]]]
       [:footer.modal-card-foot
        [:div.buttons
@@ -141,33 +141,81 @@
         [:button.button "Replay"]]]]]))
 
 (defn catalog-dropdown []
-  (let [catalogs (rf/subscribe [::subs/catalog-list])]
+  (let [catalogs        (rf/subscribe [::subs/catalog-list])
+        curr-cat-id     (rf/subscribe [::subs/current-catalog-id])
+        catalog-name    (rf/subscribe [::subs/current-catalog-name])
+        dropdown-active (rf/subscribe [::subs/catalog-dropdown-active])]
     (when (seq @catalogs)
       [:div.field.is-horizontal.control
        [:div.field-label.is-normal
         [:label.label {:style {:white-space "nowrap"}} "Level pack"]]
        [:div.field-body
         [:div.field.is-narrow
-         [:div.control
-          [:div.select
-           [:select {:on-change #(rf/dispatch [::events/set-catalog
-                                               (-> % .-target .-value)])}
+         [:div.dropdown
+          {:class (when @dropdown-active "is-active")}
+          [:div.dropdown-trigger
+           [:button.button
+            {:aria-haspopup true
+             :aria-controls "catalog-dropdown"
+             :on-click #(do (rf/dispatch
+                             [::events/toggle-level-dropdown-active false])
+                            (rf/dispatch
+                             [::events/toggle-catalog-dropdown-active]))}
+            [:span @catalog-name]
+            [:span.icon.is-small
+             [:i.fas.fa-angle-down {:aria-hidden true}]]]]
+          [:div#catalog-dropdown.dropdown-menu {:role "menu"}
+           [:div.dropdown-content
             (for [c @catalogs]
-              ^{:key (:id c)}[:option {:value (:id c)} (:name c)])]]]]]])))
+              ^{:key (:id c)}
+              [:a.dropdown-item
+               {:href (str "#/catalog/" (:id c))
+                :class (when (= @curr-cat-id (:id c)) "is-active")
+                :style {:padding "2px 10px"}}
+               [:div [:span.icon.has-text-info
+                      [:i.fas.fa-star
+                       {:style {:visibility "hidden"
+                                :margin-right "5px"}
+                        :aria-hidden true}]]
+                (:name c)]])]]]]]])))
 
 (defn level-dropdown []
-  (let [levels (rf/subscribe [::subs/current-catalog-levels])]
+  (let [levels          (rf/subscribe [::subs/current-catalog-levels])
+        curr-level-id   (rf/subscribe [::subs/current-level-id])
+        level-name      (rf/subscribe [::subs/current-level-name])
+        dropdown-active (rf/subscribe [::subs/level-dropdown-active])]
     [:div.field.is-horizontal.control
      [:div.field-label.is-normal
-      [:label.label {:style {:white-space "nowrap"}} "Level"]]
+      [:label.label "Level"]]
      [:div.field-body
       [:div.field.is-narrow
-       [:div.control
-        [:div.select
-         [:select {:on-change #(rf/dispatch [::events/download-level
-                                             (-> % .-target .-value)])}
+       [:div.dropdown
+        {:class (when @dropdown-active "is-active")}
+        [:div.dropdown-trigger
+         [:button.button
+          {:aria-haspopup true
+           :aria-controls "level-dropdown"
+           :on-click #(do (rf/dispatch
+                           [::events/toggle-catalog-dropdown-active false])
+                          (rf/dispatch
+                           [::events/toggle-level-dropdown-active]))}
+          [:span @level-name]
+          [:span.icon.is-small
+           [:i.fas.fa-angle-down {:aria-hidden true}]]]]
+        [:div#level-dropdown.dropdown-menu {:role "menu"}
+         [:div.dropdown-content
           (for [l @levels]
-            ^{:key (:id l)}[:option {:value (:id l)} (:name l)])]]]]]]))
+            ^{:key (:id l)}
+            [:a.dropdown-item
+             {:href (str "#/level/" (:id l))
+              :class (when (= @curr-level-id (:id l)) "is-active")
+              :style {:padding "2px 10px"}}
+             [:span.icon.has-text-info
+              [:i.fas
+               {:class (if (:finished l) "fa-check-square" "fa-square")
+                :style {:margin-right "5px"}
+                :aria-hidden true}]]
+             (:name l)])]]]]]]))
 
 (defn- level-selection []
   [:div {:style {:width "540px"}}

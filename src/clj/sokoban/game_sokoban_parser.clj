@@ -16,7 +16,7 @@
                                              (s/tag :span)
                                              (s/attr :title)))
                               link)
-                    first :content first)]
+                    first :content first (Integer/parseInt))]
     {:id   cid
      :name name
      :size size
